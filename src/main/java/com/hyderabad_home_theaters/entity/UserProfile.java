@@ -11,31 +11,31 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
-@Entity
 @Data
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Brand {
+public class UserProfile {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
-    @Column(name = "brand_id")
-    private  Long brandId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "profile_id")
+    private Long profileId;
 
-    @Column(name = "brand_name")
-    private String brandName;
+    @Column(name = "user_name")
+    private String username;
 
-    @Column(name = "brand_description")
-    private String brandDescription;
+    @Column(name = "email")
+    private String email;
 
-    @Column(name = "tagLine")
-    private String tagLine;
+    @Column(name = "mobile_number")
+    private String mobileNumber;
 
-    @Column(name = "image_name")
-    private String imageName;
+    @Column(name = "password")
+    private String password;
 
-    @Column(name = "image_URL")
-    private String imageURL;
+    @Column(name = "address")
+    private String address;
 
     @Column(name = "created_by")
     private String createdBy;
@@ -48,4 +48,5 @@ public class Brand {
 
     @Column(name = "updated_date")
     private Timestamp updatedDate;
+
 }
