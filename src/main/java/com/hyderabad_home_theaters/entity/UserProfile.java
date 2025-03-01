@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,9 +36,6 @@ public class UserProfile {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "address")
-    private String address;
-
     @Column(name = "created_by")
     private String createdBy;
 
@@ -48,5 +47,9 @@ public class UserProfile {
 
     @Column(name = "updated_date")
     private Timestamp updatedDate;
+
+    @ManyToOne
+    @JoinColumn(name = "address")
+    private Address address;
 
 }
