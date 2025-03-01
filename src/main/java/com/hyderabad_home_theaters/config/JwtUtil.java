@@ -20,13 +20,14 @@ import java.util.stream.Collectors;
 public class JwtUtil {
 
     @Value("${jwt.token.validity}")
-    public long TOKEN_VALIDITY;
+    private long TOKEN_VALIDITY; // Use private for better encapsulation
 
     @Value("${jwt.signing.key}")
-    public String SIGNING_KEY;
+    private String SIGNING_KEY;
 
-    @Value("${jwt.authorities.key}")
-    public String AUTHORITIES_KEY;
+    private Key getSigningKey() {
+        return Keys.hmacShaKeyFor(SIGNING_KEY.getBytes(StandardCharsets.UTF_8));
+    }
 
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
@@ -42,10 +43,15 @@ public class JwtUtil {
     }
 
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser()
-                .setSigningKey(SIGNING_KEY)
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (JwtException e) {
+            throw new RuntimeException("Invalid JWT token", e);
+        }
     }
 
     private Boolean isTokenExpired(String token) {
@@ -54,16 +60,17 @@ public class JwtUtil {
     }
 
     public String generateToken(Authentication authentication) {
-        String authorities = authentication.getAuthorities().stream()
+        String role = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
+                .findFirst()
+                .orElse("ROLE_USER");
 
         return Jwts.builder()
                 .setSubject(authentication.getName())
-                .claim(AUTHORITIES_KEY, authorities)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY * 1000))
-                .signWith(SignatureAlgorithm.HS256, SIGNING_KEY)
+                .claim("role", role)  // 🔥 Ensure role is inside the token
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY * 1000)) // Keep expiration
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -72,14 +79,18 @@ public class JwtUtil {
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
-    UsernamePasswordAuthenticationToken getAuthenticationToken(final String token, final Authentication existingAuth, final UserDetails userDetails) {
-        final JwtParser jwtParser = Jwts.parser().setSigningKey(SIGNING_KEY);
-        final Jws<Claims> claimsJws = jwtParser.parseClaimsJws(token);
-        final Claims claims = claimsJws.getBody();
+    public UsernamePasswordAuthenticationToken getAuthenticationToken(
+            final String token, final Authentication existingAuth, final UserDetails userDetails) {
+        final Claims claims = getAllClaimsFromToken(token);
+
+        // 🔹 Fetch role from "role" field instead of "authorities"
+        String role = claims.get("role", String.class);
+        if (role == null) {
+            throw new RuntimeException("Role not found in token");
+        }
+
         final Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+                Collections.singletonList(new SimpleGrantedAuthority(role)); // Create a list with one role
 
         return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
     }

@@ -44,7 +44,7 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
-    public BrandDTO createBrand(BrandDTO brandDTO)throws ApplicationBusinessException {
+    public BrandDTO createBrand (BrandDTO brandDTO)throws ApplicationBusinessException {
         try {
             Brand brand = BrandMapper.convertToEntity(brandDTO);
             brand.setBrandName(brandDTO.getBrandName());
