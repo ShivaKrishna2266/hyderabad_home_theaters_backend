@@ -37,9 +37,12 @@ public class AuthController {
 
     // Register a new user
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody UserDTO request) {
+    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserDTO request) {
         userDetailsService.registerUser(request);
-        return ResponseEntity.ok("User registered successfully");
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "User registered successfully");
+
+        return ResponseEntity.ok(response);
     }
 
 
