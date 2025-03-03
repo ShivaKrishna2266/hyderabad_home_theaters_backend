@@ -58,7 +58,7 @@ public class BrandServiceImpl implements BrandService {
             brand.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
             Brand savedBrand = brandRepository.save(brand);
             BrandDTO brandDTO1 = BrandMapper.convertToDTO(savedBrand);
-            return brandDTO1;
+            return  brandDTO1;
         }catch (Exception e){
             throw new ApplicationBusinessException("Business error occurred", e);
         }
@@ -66,6 +66,23 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     public BrandDTO updateBrand(Long brandId, BrandDTO brandDTO) {
+        Optional<Brand> optionalBrand = brandRepository.findById(brandId);
+        if (optionalBrand.isPresent()){
+            Brand brand = optionalBrand.get();
+            brand.setBrandName(brandDTO.getBrandName());
+            brand.setBrandDescription(brandDTO.getBrandDescription());
+            brand.setTagLine(brand.getTagLine());
+            brand.setImageName(brandDTO.getImageName());
+            brand.setImageURL(brandDTO.getImageURL());
+            brand.setCreatedBy("System");
+            brand.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
+            brand.setUpdatedBy("System");
+            brand.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
+             Brand savedBrand =  brandRepository.save(brand);
+             BrandDTO brandDTO1 = BrandMapper.convertToDTO(savedBrand);
+             return  brandDTO1;
+
+        }
         return null;
     }
 

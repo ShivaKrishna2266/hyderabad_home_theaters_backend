@@ -20,7 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping
-@CrossOrigin(origins = "http://localhost:4200") // ✅ Allow frontend calls
+@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
 
     @Autowired
