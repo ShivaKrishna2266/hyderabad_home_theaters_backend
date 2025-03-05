@@ -49,7 +49,8 @@ public class Category {
     @Column(name = "updated_date")
     private Timestamp updatedDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "brand_id")
     private Brand brand;
+
 }

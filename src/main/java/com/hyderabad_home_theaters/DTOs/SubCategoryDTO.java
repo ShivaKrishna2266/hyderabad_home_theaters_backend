@@ -1,6 +1,5 @@
 package com.hyderabad_home_theaters.DTOs;
 
-import com.hyderabad_home_theaters.entity.Brand;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,12 +7,12 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CategoryDTO {
+public class SubCategoryDTO {
 
-    private Long categoryId;
-    private String categoryName;
+    private  Long subCategoryId;
+    private String subCategoryName;
     private String description;
     private String tagline;
-    private Boolean status;
-    private Long brandId;
+    private Long categoryId;
+    private Long productId;
 }
