@@ -8,21 +8,10 @@ import com.hyderabad_home_theaters.entity.SubCategory;
 import com.hyderabad_home_theaters.repository.BrandRepository;
 import com.hyderabad_home_theaters.repository.CategoryRepository;
 import com.hyderabad_home_theaters.repository.SubCategoryRepository;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class ProductMapper {
 
-    @Autowired
-    private static BrandRepository brandRepository;
-    @Autowired
-    private static CategoryRepository categoryRepository;
-
-    @Autowired
-    private static SubCategoryRepository subCategoryRepository;
-
-    public static final ModelMapper modelMapper = new ModelMapper();
+//    public static final ModelMapper modelMapper = new ModelMapper();
 
     public static ProductDTO convertToDTO(Product product){
         ProductDTO productDTO = new ProductDTO();
@@ -36,14 +25,22 @@ public class ProductMapper {
         productDTO.setImageURL(product.getImageURL());
         productDTO.setStatus(product.getStatus());
 
-        productDTO.setBrandId(product.getBrand().getBrandId());
-        productDTO.setCategoryId(product.getCategory().getCategoryId());
-        productDTO.setSubCategoryId(product.getSubCategory().getSubCategoryId());
-
+        if (product.getBrand() != null) {
+            productDTO.setBrandId(product.getBrand().getBrandId());
+        }
+        if (product.getCategory() != null) {
+            productDTO.setCategoryId(product.getCategory().getCategoryId());
+        }
+        if (product.getSubCategory() != null) {
+            productDTO.setSubCategoryId(product.getSubCategory().getSubCategoryId());
+        }
         return  productDTO;
     }
 
-    public static Product convertToEntity(ProductDTO productDTO){
+    public static Product convertToEntity(ProductDTO productDTO,
+                                          BrandRepository brandRepository,
+                                          CategoryRepository categoryRepository,
+                                          SubCategoryRepository subCategoryRepository){
         Product product = new Product();
         product.setProductId(productDTO.getProductId());
         product.setProductName(productDTO.getProductName());
