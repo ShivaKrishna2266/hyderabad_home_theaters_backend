@@ -5,6 +5,7 @@ import com.hyderabad_home_theaters.entity.Brand;
 import com.hyderabad_home_theaters.entity.Category;
 import com.hyderabad_home_theaters.entity.Product;
 import com.hyderabad_home_theaters.entity.SubCategory;
+import com.hyderabad_home_theaters.exception.ResourceNotFoundException;
 import com.hyderabad_home_theaters.mapper.ProductMapper;
 import com.hyderabad_home_theaters.repository.BrandRepository;
 import com.hyderabad_home_theaters.repository.CategoryRepository;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -57,7 +60,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
-        Product product = ProductMapper.convertToEntity(productDTO);
+        Product product = ProductMapper.convertToEntity(productDTO,brandRepository,categoryRepository,subCategoryRepository);
 
         product.setProductName(productDTO.getProductName());
         product.setProductPrice(productDTO.getProductPrice());
@@ -121,9 +124,23 @@ public class ProductServiceImpl implements ProductService {
         }
         return  null;
     }
+    @Override
+    public List<ProductDTO> getProductsByBrand(Long brandId) {
+        List<Product> products = productRepository.findByBrandId(brandId);
+        List<ProductDTO> productDTOS = new ArrayList<>();
+
+        for (Product product : products) {
+            ProductDTO dto = ProductMapper.convertToDTO(product);
+            productDTOS.add(dto);
+        }
+        return productDTOS.isEmpty() ? Collections.emptyList() : productDTOS;
+    }
+
+
 
     @Override
     public void deleteProductById(Long productId) {
 
     }
+
 }

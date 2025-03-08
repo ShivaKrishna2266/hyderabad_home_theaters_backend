@@ -11,4 +11,6 @@ public interface ProductService {
     ProductDTO createProduct(ProductDTO productDTO);
     ProductDTO updateProduct(Long productId, ProductDTO productDTO);
     void deleteProductById(Long productId);
+
+    public List<ProductDTO> getProductsByBrand(Long brandId);
 }

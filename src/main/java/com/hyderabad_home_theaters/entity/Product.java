@@ -49,16 +49,16 @@ public class Product {
     @Column(name ="image_URL")
     private String  imageURL;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", referencedColumnName = "category_id")
     private Category category;
 
-    @ManyToOne
-    @JoinColumn(name = "brand_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id", referencedColumnName = "brand_id")
     private Brand brand;
 
-    @ManyToOne
-    @JoinColumn(name = "sub_category_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sub_category_id", referencedColumnName = "sub_category_id")
     private SubCategory subCategory;
 
     @Column(name = "createdBy")

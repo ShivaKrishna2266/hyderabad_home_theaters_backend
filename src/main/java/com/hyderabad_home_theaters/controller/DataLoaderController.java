@@ -285,6 +285,26 @@ public class DataLoaderController {
         }
     }
 
+
+    //=======================Get Product By Brand ===========================//
+
+    @GetMapping("/getProductsByBrand/{brandId}")
+    public ResponseEntity<ApiResponse<List<ProductDTO>>> getProductsByBrand(@PathVariable Long brandId) {
+        ApiResponse<List<ProductDTO>> response = new ApiResponse<>();
+        List<ProductDTO> products = productService.getProductsByBrand(brandId);
+
+        if (!products.isEmpty()) {
+            response.setStatus(200);
+            response.setMessage("Fetch data successfully");
+            response.setData(products);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(404);
+            response.setMessage("No products found for the given brand");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
     @DeleteMapping("/deleteProduct/{productId}")
     public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long productId) {
         ApiResponse<Void> response = new ApiResponse<>();
