@@ -1,6 +1,5 @@
 package com.hyderabad_home_theaters.DTOs;
 
-import com.hyderabad_home_theaters.entity.Brand;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,4 +15,5 @@ public class CategoryDTO {
     private String tagline;
     private Boolean status;
     private Long brandId;
+    private Long subCategoryId;
 }

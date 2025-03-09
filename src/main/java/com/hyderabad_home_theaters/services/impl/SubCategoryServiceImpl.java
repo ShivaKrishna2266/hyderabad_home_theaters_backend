@@ -1,9 +1,11 @@
 package com.hyderabad_home_theaters.services.impl;
 
+import com.hyderabad_home_theaters.DTOs.ProductDTO;
 import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
 import com.hyderabad_home_theaters.entity.Category;
 import com.hyderabad_home_theaters.entity.Product;
 import com.hyderabad_home_theaters.entity.SubCategory;
+import com.hyderabad_home_theaters.mapper.ProductMapper;
 import com.hyderabad_home_theaters.mapper.SubCategoryMapper;
 import com.hyderabad_home_theaters.repository.CategoryRepository;
 import com.hyderabad_home_theaters.repository.ProductRepository;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -100,4 +104,17 @@ public class SubCategoryServiceImpl implements SubCategoryService {
             throw new RuntimeException("SubCategory not found with ID: " + subCategoryId);
         }
     }
+
+    @Override
+    public List<SubCategoryDTO> getSubCategoryByCategory(Long categoryId) {
+        List<SubCategory> subCategories =subCategoryRepository.findByCategoryId(categoryId);
+        List<SubCategoryDTO> subCategoryDTOS = new ArrayList<>();
+
+        for(SubCategory subCategory : subCategories){
+            SubCategoryDTO dto = SubCategoryMapper.convertToDTO(subCategory);
+            subCategoryDTOS.add(dto);
+        }
+        return  subCategoryDTOS.isEmpty() ? Collections.emptyList() : subCategoryDTOS;
+    }
+
 }
