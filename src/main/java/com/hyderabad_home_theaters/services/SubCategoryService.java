@@ -1,5 +1,6 @@
 package com.hyderabad_home_theaters.services;
 
+import com.hyderabad_home_theaters.DTOs.ProductDTO;
 import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
 
 import java.util.List;
@@ -15,4 +16,6 @@ public interface SubCategoryService {
     SubCategoryDTO updateSubCategory(Long subcategoryId, SubCategoryDTO subCategoryDTO);
 
     void deleteSubCategoryById(Long subCategoryId);
+
+    public List<SubCategoryDTO> getSubCategoryByCategory(Long categoryId);
 }

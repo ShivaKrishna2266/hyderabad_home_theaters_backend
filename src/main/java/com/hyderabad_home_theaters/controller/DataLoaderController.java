@@ -406,5 +406,23 @@ public class DataLoaderController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    //====================Get SubCategory By Category===============================//
+
+    @GetMapping("/getSubCategoryByCategory/{categoryId}")
+    public ResponseEntity<ApiResponse<List<SubCategoryDTO>>> getSubCategoryByCategoryId(@PathVariable Long categoryId){
+        ApiResponse<List<SubCategoryDTO>> response = new ApiResponse<>();
+        List<SubCategoryDTO> subCategoryDTOS = subCategoryService.getSubCategoryByCategory(categoryId);
+        if (subCategoryDTOS != null){
+            response.setStatus(200);
+            response.setMessage("Successfully Fetched  a SubCategory By Category!");
+            response.setData(subCategoryDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to SubCategory By Category!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }

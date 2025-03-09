@@ -1,8 +1,5 @@
 package com.hyderabad_home_theaters.DTOs;
 
-import com.hyderabad_home_theaters.entity.Brand;
-import com.hyderabad_home_theaters.entity.Category;
-import com.hyderabad_home_theaters.entity.SubCategory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
