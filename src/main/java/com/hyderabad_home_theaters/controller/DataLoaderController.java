@@ -2,12 +2,18 @@ package com.hyderabad_home_theaters.controller;
 
 import com.hyderabad_home_theaters.DTOs.BrandDTO;
 import com.hyderabad_home_theaters.DTOs.CategoryDTO;
+import com.hyderabad_home_theaters.DTOs.ContactUsDTO;
+import com.hyderabad_home_theaters.DTOs.CountryCodeDTO;
+import com.hyderabad_home_theaters.DTOs.GeneralSettingsDTO;
 import com.hyderabad_home_theaters.DTOs.ProductDTO;
 import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
 import com.hyderabad_home_theaters.entity.ApiResponse;
 import com.hyderabad_home_theaters.exception.ResourceNotFoundException;
 import com.hyderabad_home_theaters.services.BrandService;
 import com.hyderabad_home_theaters.services.CategoryService;
+import com.hyderabad_home_theaters.services.ContactUsService;
+import com.hyderabad_home_theaters.services.CountryCodeService;
+import com.hyderabad_home_theaters.services.GeneralSettingService;
 import com.hyderabad_home_theaters.services.ProductService;
 import com.hyderabad_home_theaters.services.SubCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.PrivateKey;
 import java.util.List;
 
 @RestController
@@ -41,6 +48,15 @@ public class DataLoaderController {
 
    @Autowired
    private SubCategoryService subCategoryService;
+
+   @Autowired
+    private ContactUsService contactUsService;
+
+   @Autowired
+   private CountryCodeService countryCodeService;
+
+   @Autowired
+   private GeneralSettingService generalSettingService;
 
 
 
@@ -423,6 +439,64 @@ public class DataLoaderController {
             response.setData(null);
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+
+    //====================CONTACT US==========================================//
+
+
+    @PostMapping("/addContactUs")
+    public ResponseEntity<ApiResponse<ContactUsDTO>> addContactUs(@RequestBody ContactUsDTO contactUsDTO) {
+        ApiResponse<ContactUsDTO> response = new ApiResponse<>();
+        ContactUsDTO contactUsDTOs = contactUsService.createContactUs(contactUsDTO);
+        if (contactUsDTOs != null) {
+            response.setStatus(200);
+            response.setMessage("Created contact successfully!");
+            response.setData(contactUsDTOs);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to create contact!");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    //===========================Country Code===============================//
+
+    @GetMapping("/getAllCountryCodes")
+    public ResponseEntity<ApiResponse<List<CountryCodeDTO>>> getAllCountryCodes() {
+        ApiResponse<List<CountryCodeDTO>> response = new ApiResponse<>();
+        List<CountryCodeDTO> countryCodeDTO = countryCodeService.getAllCountryCodes();
+        if (countryCodeDTO != null) {
+            response.setStatus(200);
+            response.setMessage("fetched successfully!");
+            response.setData(countryCodeDTO);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("no records were found");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    //===================General Settings =============================//
+
+    @GetMapping("/getAllGeneralSettings")
+    public ResponseEntity<ApiResponse<List<GeneralSettingsDTO>>> getAllGeneralSettings() {
+        ApiResponse<List<GeneralSettingsDTO>> response = new ApiResponse<>();
+        List<GeneralSettingsDTO> generalSettingsDTOS = generalSettingService.getAllGeneralSettings();
+        if (generalSettingsDTOS != null) {
+            response.setStatus(200);
+            response.setMessage("GeneralSettings retrieved successfully");
+            response.setData(generalSettingsDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+
+            response.setStatus(500);
+            response.setMessage("GeneralSettings retrieved failed");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
 }
