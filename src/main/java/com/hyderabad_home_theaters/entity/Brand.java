@@ -2,6 +2,7 @@ package com.hyderabad_home_theaters.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -41,6 +42,9 @@ public class Brand {
     @Column(name = "image_URL")
     private String imageURL;
 
+    @Column(name = "status")
+    private String status;
+
     @Column(name = "created_by")
     private String createdBy;
 
@@ -53,7 +57,9 @@ public class Brand {
     @Column(name = "updated_date")
     private Timestamp updatedDate;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", referencedColumnName = "category_id")
     private Category category;
+
+
 }
