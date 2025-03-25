@@ -11,4 +11,5 @@ public interface BrandService {
     BrandDTO createBrand (BrandDTO brandDTO);
     BrandDTO updateBrand (Long brandId, BrandDTO brandDTO);
     void deleteBrandById(Long brandId);
+    BrandDTO updateBrandStatusById (Long brandId, String status);
 }

@@ -16,6 +16,8 @@ public class BrandDTO {
     private String tagLine;
     private String imageName;
     private String imageURL;
+    private String status;
+    private Long categoryId;
     private String createdBy;
     private Timestamp createdDate;
     private String updatedBy;
