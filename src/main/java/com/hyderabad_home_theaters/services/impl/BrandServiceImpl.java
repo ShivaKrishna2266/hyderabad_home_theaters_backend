@@ -77,9 +77,10 @@ public class BrandServiceImpl implements BrandService {
             Brand brand = optionalBrand.get();
             brand.setBrandName(brandDTO.getBrandName());
             brand.setBrandDescription(brandDTO.getBrandDescription());
-            brand.setTagLine(brand.getTagLine());
+            brand.setTagLine(brandDTO.getTagLine());
             brand.setImageName(brandDTO.getImageName());
             brand.setImageURL(brandDTO.getImageURL());
+            brand.setStatus(brandDTO.getStatus());
 
 
             if (brandDTO.getCategoryId() != null) {
@@ -88,7 +89,6 @@ public class BrandServiceImpl implements BrandService {
             } else {
                 System.out.println("Category ID is null in brandDTO");
             }
-
 
             brand.setCreatedBy("System");
             brand.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
