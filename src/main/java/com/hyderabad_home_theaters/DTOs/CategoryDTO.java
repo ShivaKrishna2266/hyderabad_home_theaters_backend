@@ -14,6 +14,7 @@ public class CategoryDTO {
     private String description;
     private String tagline;
     private Boolean status;
+    private String imageUrl;
     private Long brandId;
     private Long subCategoryId;
 }
