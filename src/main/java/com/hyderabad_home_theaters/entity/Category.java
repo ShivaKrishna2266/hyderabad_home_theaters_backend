@@ -37,6 +37,9 @@ public class Category {
     @Column(name = "status")
     private Boolean status;
 
+    @Column(name = "image_Url")
+    private String imageUrl;
+
     @Column(name = "createdBy")
     private String createdBy;
 

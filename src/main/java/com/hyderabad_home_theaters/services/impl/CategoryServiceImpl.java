@@ -3,9 +3,11 @@ package com.hyderabad_home_theaters.services.impl;
 import com.hyderabad_home_theaters.DTOs.CategoryDTO;
 import com.hyderabad_home_theaters.entity.Brand;
 import com.hyderabad_home_theaters.entity.Category;
+import com.hyderabad_home_theaters.entity.SubCategory;
 import com.hyderabad_home_theaters.mapper.CategoryMapper;
 import com.hyderabad_home_theaters.repository.BrandRepository;
 import com.hyderabad_home_theaters.repository.CategoryRepository;
+import com.hyderabad_home_theaters.repository.SubCategoryRepository;
 import com.hyderabad_home_theaters.services.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Autowired
     private BrandRepository brandRepository;
+
+    @Autowired
+    private SubCategoryRepository subCategoryRepository;
 
     @Override
     public List<CategoryDTO> getAllCategories() {
@@ -47,13 +52,14 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDTO createCategory(CategoryDTO categoryDTO) {
         // Convert DTO to Entity
-        Category category = CategoryMapper.convertToEntity(categoryDTO);
+        Category category = CategoryMapper.convertToEntity(categoryDTO,brandRepository, subCategoryRepository);
 
         // Set Category attributes
         category.setCategoryName(categoryDTO.getCategoryName());
         category.setDescription(categoryDTO.getDescription());
         category.setTagline(categoryDTO.getTagline());
         category.setStatus(categoryDTO.getStatus());
+        category.setImageUrl(categoryDTO.getImageUrl());
         category.setCreatedBy("System");
         category.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
         category.setUpdatedBy("System");
@@ -63,14 +69,11 @@ public class CategoryServiceImpl implements CategoryService {
         Brand brand = brandRepository.findById(categoryDTO.getBrandId()) .orElseThrow(() -> new RuntimeException("Brand not found"));
         category.setBrand(brand);
 
+//        SubCategory subCategory = subCategoryRepository.findById(categoryDTO.getSubCategoryId()).orElseThrow(() -> new RuntimeException("Sub Category is not found"));
+//        category.setSubCategory(subCategory);
 
         Category savedCategory = categoryRepository.save(category);
-        System.out.println("Saved Category Brand: " + savedCategory.getBrand());
-
-        // Convert back to DTO and return
         CategoryDTO categoryDTO1 = CategoryMapper.convertToDTO(savedCategory);
-        System.out.println("Mapped DTO Brand ID: " + categoryDTO1.getBrandId());
-
         return categoryDTO1;
     }
 
@@ -84,6 +87,7 @@ public class CategoryServiceImpl implements CategoryService {
             category.setDescription(categoryDTO.getDescription());
             category.setTagline(categoryDTO.getTagline());
             category.setStatus(categoryDTO.getStatus());
+            category.setImageUrl(categoryDTO.getImageUrl());
             category.setCreatedBy("System");
             category.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
             category.setUpdatedBy("System");

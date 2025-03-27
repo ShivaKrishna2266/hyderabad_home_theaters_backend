@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -198,6 +197,23 @@ public class AdminController {
             response.setStatus(500);
             response.setMessage("failed to Fetch Categories");
             return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/createCategory")  // Ensure this matches exactly
+    public ResponseEntity<ApiResponse<CategoryDTO>> createCategory(@RequestBody CategoryDTO categoryDTO) {
+        ApiResponse<CategoryDTO> response = new ApiResponse<>();
+        CategoryDTO savedCategory = categoryService.createCategory(categoryDTO);
+
+        if (savedCategory != null) {
+            response.setStatus(200);
+            response.setMessage("Category added successfully");
+            response.setData(savedCategory);
+            return ResponseEntity.ok(response);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to add category");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 

@@ -1,10 +1,11 @@
 package com.hyderabad_home_theaters.services;
 
 import com.hyderabad_home_theaters.DTOs.CategoryDTO;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
+@Service
 public interface CategoryService {
     List<CategoryDTO> getAllCategories();
 
