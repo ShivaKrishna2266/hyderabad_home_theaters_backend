@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -44,41 +45,41 @@ public class AdminController {
     private CategoryService categoryService;
 
 
-
-
-
     @Value("${file.upload.brand.dir}")
     private String uploadBrandDir;
 
+    @Value("${file.upload.category.dir}")
+    private String uploadCategoryDir;
+
     @GetMapping("/getAllBrands")
-    private ResponseEntity<ApiResponse<List<BrandDTO>>> getAllBrands(){
+    private ResponseEntity<ApiResponse<List<BrandDTO>>> getAllBrands() {
         ApiResponse<List<BrandDTO>> response = new ApiResponse<>();
         List<BrandDTO> brandDTOS = brandService.getAllBrands();
-        if(brandDTOS != null){
+        if (brandDTOS != null) {
             response.setStatus(200);
             response.setMessage("Fetch All Brands successfully");
             response.setData(brandDTOS);
             return new ResponseEntity<>(response, HttpStatus.OK);
-        }else {
+        } else {
             response.setStatus(500);
             response.setMessage("failed to Fetch Brands");
-            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/getBrandById/{brandId}")
-    public ResponseEntity<ApiResponse<BrandDTO>> getBrandById(@PathVariable Long brandId ){
+    public ResponseEntity<ApiResponse<BrandDTO>> getBrandById(@PathVariable Long brandId) {
         ApiResponse<BrandDTO> response = new ApiResponse<>();
         BrandDTO brandDTO = brandService.getBrandById(brandId);
-        if(brandDTO != null){
+        if (brandDTO != null) {
             response.setStatus(200);
             response.setMessage("Fetch Brand By Id Data Successfully");
             response.setData(brandDTO);
-            return  new ResponseEntity<>(response, HttpStatus.OK);
-        }else {
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
             response.setStatus(500);
             response.setMessage("Failed to fetch BrandById Data");
-            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -150,24 +151,24 @@ public class AdminController {
     @DeleteMapping("/deleteBrand/{brandId}")
     public ResponseEntity<ApiResponse<Void>> deleteBrandById(@PathVariable Long brandId) {
         ApiResponse<Void> response = new ApiResponse<>();
-            brandService.deleteBrandById(brandId);
-            if (brandId != null) {
-                response.setStatus(200);
-                response.setMessage("Successfully deleted a Brand!");
-                response.setData(null);
-                return new ResponseEntity<>(response, HttpStatus.OK);
-            } else {
-                response.setStatus(500);
-                response.setMessage("Failed to delete a Brand!");
-                response.setData(null);
-                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+        brandService.deleteBrandById(brandId);
+        if (brandId != null) {
+            response.setStatus(200);
+            response.setMessage("Successfully deleted a Brand!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to delete a Brand!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
 
 
     @GetMapping("/updateBrandStatus/{brandId}/{status}")
     public ResponseEntity<ApiResponse<BrandDTO>> updateBrandStatus(@PathVariable Long brandId,
-                                                                               @PathVariable String status) {
+                                                                   @PathVariable String status) {
         ApiResponse<BrandDTO> response = new ApiResponse<>();
         BrandDTO brandDTOs = brandService.updateBrandStatusById(brandId, status);
         if (brandDTOs != null) {
@@ -185,37 +186,79 @@ public class AdminController {
     //========================CATEGORY=======================//
 
     @GetMapping("/getAllCategories")
-    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getAllCategories(){
+    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getAllCategories() {
         ApiResponse<List<CategoryDTO>> response = new ApiResponse<>();
         List<CategoryDTO> categoryDTOS = categoryService.getAllCategories();
-        if (categoryDTOS != null){
+        if (categoryDTOS != null) {
             response.setStatus(200);
             response.setMessage("Fetched All Categories Successfully");
             response.setData(categoryDTOS);
-            return  new ResponseEntity<>(response, HttpStatus.OK);
-        }else {
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
             response.setStatus(500);
             response.setMessage("failed to Fetch Categories");
-            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @PostMapping("/createCategory")  // Ensure this matches exactly
-    public ResponseEntity<ApiResponse<CategoryDTO>> createCategory(@RequestBody CategoryDTO categoryDTO) {
+    @PostMapping("/createCategory")
+    public ResponseEntity<ApiResponse<CategoryDTO>> createCategory(@RequestPart("categoryDTO") String categoryDTO,
+                                                                   @RequestPart("categoryImageFile") MultipartFile categoryImageFile) {
         ApiResponse<CategoryDTO> response = new ApiResponse<>();
-        CategoryDTO savedCategory = categoryService.createCategory(categoryDTO);
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            CategoryDTO categoryIamgeDtoObj = objectMapper.readValue(categoryDTO, CategoryDTO.class);
+            String fileName = categoryImageFile.getOriginalFilename();
+            Path filePath = Paths.get(uploadCategoryDir, fileName);
+            Files.createDirectories(filePath.getParent());
+            Files.copy(categoryImageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            categoryIamgeDtoObj.setImageUrl(fileName);
 
-        if (savedCategory != null) {
-            response.setStatus(200);
-            response.setMessage("Category added successfully");
-            response.setData(savedCategory);
-            return ResponseEntity.ok(response);
-        } else {
+            CategoryDTO savedCategory = categoryService.createCategory(categoryIamgeDtoObj);
+
+            if (savedCategory != null) {
+                response.setStatus(200);
+                response.setMessage("Category added successfully");
+                response.setData(savedCategory);
+                return ResponseEntity.ok(response);
+            } else {
+                response.setStatus(500);
+                response.setMessage("Failed to add category");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+        } catch (IOException e) {
             response.setStatus(500);
-            response.setMessage("Failed to add category");
+            response.setMessage("Error processing brand creation: " + e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/updateCategoryById/{categoryId}")
+    public ResponseEntity<ApiResponse<CategoryDTO>> updateCategoryById(
+            @PathVariable Long categoryId,
+            @RequestBody CategoryDTO categoryDTO) {
+
+        ApiResponse<CategoryDTO> response = new ApiResponse<>();
+
+        try {
+            CategoryDTO updatedCategory = categoryService.updateCategory(categoryId, categoryDTO);
+
+            if (updatedCategory != null) {
+                response.setStatus(200);
+                response.setMessage("Category updated successfully");
+                response.setData(updatedCategory);
+                return ResponseEntity.ok(response);
+            } else {
+                response.setStatus(404);
+                response.setMessage("Category not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage("Error updating category: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
-
-    }
+}
