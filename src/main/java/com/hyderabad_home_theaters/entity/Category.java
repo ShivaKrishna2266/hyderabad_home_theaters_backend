@@ -35,7 +35,7 @@ public class Category {
     private String tagline;
 
     @Column(name = "status")
-    private Boolean status;
+    private String status;
 
     @Column(name = "image_Url")
     private String imageUrl;
