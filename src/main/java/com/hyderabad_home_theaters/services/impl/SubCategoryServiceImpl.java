@@ -72,28 +72,30 @@ public class SubCategoryServiceImpl implements SubCategoryService {
 
     @Override
     public SubCategoryDTO updateSubCategory(Long subcategoryId, SubCategoryDTO subCategoryDTO) {
-        return subCategoryRepository.findById(subcategoryId)
-                .map(subCategory -> {
-                    subCategory.setSubCategoryName(subCategoryDTO.getSubCategoryName());
-                    subCategory.setDescription(subCategoryDTO.getDescription());
-                    subCategory.setTagline(subCategoryDTO.getTagline()); // Fixed issue here
-                    subCategory.setUpdatedBy("System");
-                    subCategory.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
+        Optional<SubCategory> optionalSubCategory = subCategoryRepository.findById(subcategoryId);
+        if (optionalSubCategory.isPresent()) {
+            SubCategory subCategory = optionalSubCategory.get();
+            subCategory.setSubCategoryName(subCategoryDTO.getSubCategoryName());
+            subCategory.setDescription(subCategoryDTO.getDescription());
+            subCategory.setTagline(subCategoryDTO.getTagline()); // Fixed issue here
+            subCategory.setUpdatedBy("System");
+            subCategory.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
 
-                    Product product = productRepository.findById(subCategoryDTO.getProductId()).orElse(null);
-                    if (product != null) {
-                        subCategory.setProduct(product);
-                    }
+            Product product = productRepository.findById(subCategoryDTO.getProductId()).orElse(null);
+            if (product != null) {
+                subCategory.setProduct(product);
+            }
 
-                    Category category = categoryRepository.findById(subCategoryDTO.getCategoryId()).orElse(null);
-                    if (category != null) {
-                        subCategory.setCategory(category);
-                    }
+            Category category = categoryRepository.findById(subCategoryDTO.getCategoryId()).orElse(null);
+            if (category != null) {
+                subCategory.setCategory(category);
+            }
 
-                    SubCategory savedSubCategory = subCategoryRepository.save(subCategory);
-                    return SubCategoryMapper.convertToDTO(savedSubCategory);
-                })
-                .orElse(null);
+            SubCategory savedSubCategory = subCategoryRepository.save(subCategory);
+            SubCategoryDTO subCategoryDTO1 = SubCategoryMapper.convertToDTO(savedSubCategory);
+            return subCategoryDTO1;
+        }
+        return  null;
     }
 
     @Override
