@@ -12,7 +12,7 @@ public class ProductDTO {
     private Long productId;
     private String productName;
     private Integer stockQuantity;
-    private Boolean status;
+    private String status;
     private Integer productPrice;
     private Integer productRank;
     private String productSku;
@@ -21,5 +21,17 @@ public class ProductDTO {
     private Long categoryId;
     private Long brandId;
     private Long subCategoryId;
+
+    private Double originalPrice;
+    private Double discountedPrice;
+    private Double discountPercentage;
+    private Double taxPercentage;
+    private String currency;
+    private String color;
+    private String size;
+    private Double weight;
+    private String dimensions;
+    private String material;
+    private Integer warrantyPeriod;
 
 }

@@ -60,41 +60,69 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
-        Product product = ProductMapper.convertToEntity(productDTO,brandRepository,categoryRepository,subCategoryRepository);
+        // Convert DTO to Entity (includes mapping Brand, Category, SubCategory)
+        Product product = ProductMapper.convertToEntity(productDTO, brandRepository, categoryRepository, subCategoryRepository);
 
+        // Set additional fields (in case not handled in mapper)
         product.setProductName(productDTO.getProductName());
         product.setProductPrice(productDTO.getProductPrice());
         product.setProductSku(productDTO.getProductSku());
         product.setProductRank(productDTO.getProductRank());
         product.setStockQuantity(productDTO.getStockQuantity());
-        product.setImageName(product.getProductName());
+
+        // Set extra detailed product fields
+        product.setOriginalPrice(productDTO.getOriginalPrice());
+        product.setDiscountedPrice(productDTO.getDiscountedPrice());
+        product.setDiscountPercentage(productDTO.getDiscountPercentage());
+        product.setTaxPercentage(productDTO.getTaxPercentage());
+        product.setCurrency(productDTO.getCurrency());
+        product.setColor(productDTO.getColor());
+        product.setSize(productDTO.getSize());
+        product.setWeight(productDTO.getWeight());
+        product.setDimensions(productDTO.getDimensions());
+        product.setMaterial(productDTO.getMaterial());
+        product.setWarrantyPeriod(productDTO.getWarrantyPeriod());
+
+        // Set image and status
+        product.setImageName(productDTO.getImageName());
         product.setImageURL(productDTO.getImageURL());
         product.setStatus(productDTO.getStatus());
+
+        // Set audit info
         product.setCreatedBy("System");
         product.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
         product.setUpdatedBy("System");
         product.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
 
-        Brand brand = brandRepository.findById(productDTO.getBrandId()).orElseThrow(() -> new RuntimeException("Brand not found"));
-            product.setBrand(brand);
+        // Set associations (only if not already set inside mapper)
+        Brand brand = brandRepository.findById(productDTO.getBrandId())
+                .orElseThrow(() -> new RuntimeException("Brand not found with ID: " + productDTO.getBrandId()));
+        product.setBrand(brand);
 
-        Category category = categoryRepository.findById(productDTO.getCategoryId()).orElseThrow(() -> new RuntimeException("Brand not found"));
-            product.setCategory(category);
+        Category category = categoryRepository.findById(productDTO.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found with ID: " + productDTO.getCategoryId()));
+        product.setCategory(category);
 
-        SubCategory subCategory = subCategoryRepository.findById(productDTO.getSubCategoryId()).orElseThrow(() -> new RuntimeException("SubCategory Id is not found"));
-         product.setSubCategory(subCategory);
+        SubCategory subCategory = subCategoryRepository.findById(productDTO.getSubCategoryId())
+                .orElseThrow(() -> new RuntimeException("SubCategory not found with ID: " + productDTO.getSubCategoryId()));
+        product.setSubCategory(subCategory);
 
+        // Save the product to the database
         Product savedProduct = productRepository.save(product);
-        ProductDTO productDTO1 = ProductMapper.convertToDTO(savedProduct);
-        return  productDTO1;
+
+        // Convert saved entity back to DTO
+        return ProductMapper.convertToDTO(savedProduct);
     }
+
 
     @Override
     public ProductDTO updateProduct(Long productId, ProductDTO productDTO) {
         Optional<Product> optionalProduct = productRepository.findById(productId);
 
-        if (optionalProduct.isPresent()){
+        if (optionalProduct.isPresent()) {
             Product product = optionalProduct.get();
+
+            // Update core product fields
             product.setProductName(productDTO.getProductName());
             product.setProductRank(productDTO.getProductRank());
             product.setProductPrice(productDTO.getProductPrice());
@@ -103,27 +131,45 @@ public class ProductServiceImpl implements ProductService {
             product.setStockQuantity(productDTO.getStockQuantity());
             product.setImageName(productDTO.getImageName());
             product.setImageURL(productDTO.getImageURL());
-            product.setCreatedBy("System");
-            product.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
+
+            // Update additional fields
+            product.setOriginalPrice(productDTO.getOriginalPrice());
+            product.setDiscountedPrice(productDTO.getDiscountedPrice());
+            product.setDiscountPercentage(productDTO.getDiscountPercentage());
+            product.setTaxPercentage(productDTO.getTaxPercentage());
+            product.setCurrency(productDTO.getCurrency());
+            product.setColor(productDTO.getColor());
+            product.setSize(productDTO.getSize());
+            product.setWeight(productDTO.getWeight());
+            product.setDimensions(productDTO.getDimensions());
+            product.setMaterial(productDTO.getMaterial());
+            product.setWarrantyPeriod(productDTO.getWarrantyPeriod());
+
+            // Update timestamps and audit fields
             product.setUpdatedBy("System");
             product.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
 
-            Brand brand = brandRepository.findById(productDTO.getBrandId()).orElseThrow(() -> new RuntimeException("Brand not found"));
+            // Set brand, category, and subcategory
+            Brand brand = brandRepository.findById(productDTO.getBrandId())
+                    .orElseThrow(() -> new RuntimeException("Brand not found"));
             product.setBrand(brand);
 
-            Category category = categoryRepository.findById(productDTO.getCategoryId()).orElseThrow(() -> new RuntimeException("Brand not found"));
+            Category category = categoryRepository.findById(productDTO.getCategoryId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
             product.setCategory(category);
 
-            SubCategory subCategory = subCategoryRepository.findById(productDTO.getSubCategoryId()).orElseThrow(() -> new RuntimeException("SubCategory Id is not found"));
+            SubCategory subCategory = subCategoryRepository.findById(productDTO.getSubCategoryId())
+                    .orElseThrow(() -> new RuntimeException("SubCategory Id is not found"));
             product.setSubCategory(subCategory);
 
+            // Save and return updated product
             Product updatedProduct = productRepository.save(product);
-            ProductDTO productDTO1 = ProductMapper.convertToDTO(updatedProduct);
-            return  productDTO1;
-
+            return ProductMapper.convertToDTO(updatedProduct);
         }
-        return  null;
+
+        throw new RuntimeException("Product with ID " + productId + " not found.");
     }
+
     @Override
     public List<ProductDTO> getProductsByBrand(Long brandId) {
         List<Product> products = productRepository.findByBrandId(brandId);
