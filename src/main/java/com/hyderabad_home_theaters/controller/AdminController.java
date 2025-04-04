@@ -60,6 +60,9 @@ public class AdminController {
     @Value("${file.upload.category.dir}")
     private String uploadCategoryDir;
 
+    @Value("${file.upload.product.dir}")
+    private String uploadProductDir;
+
     @GetMapping("/getAllBrands")
     private ResponseEntity<ApiResponse<List<BrandDTO>>> getAllBrands() {
         ApiResponse<List<BrandDTO>> response = new ApiResponse<>();
@@ -310,9 +313,26 @@ public class AdminController {
     }
 
     @PostMapping("/createProduct")
-    public ResponseEntity<ApiResponse<ProductDTO>> createProduct(@RequestBody ProductDTO productDTO){
+    public ResponseEntity<ApiResponse<ProductDTO>> createProduct( @RequestPart("productDTO") String productDTO,
+                                                                  @RequestPart("productImageFile") MultipartFile productImageFile) {
+
         ApiResponse<ProductDTO> response = new ApiResponse<>();
-        ProductDTO productDTO1 = productService.createProduct(productDTO);
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ProductDTO productImageDtoObj = objectMapper.readValue(productDTO, ProductDTO.class);
+
+            // Extract filename
+            String fileName = productImageFile.getOriginalFilename();
+            Path filePath = Paths.get(uploadProductDir, fileName);
+
+            // Ensure directory exists
+            Files.createDirectories(filePath.getParent());
+
+            // Save the file
+            Files.copy(productImageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            productImageDtoObj.setImageURL(fileName);
+        ProductDTO productDTO1 = productService.createProduct(productImageDtoObj);
         if (productDTO1 != null){
             response.setStatus(200);
             response.setMessage("Create Product Successfully");
@@ -322,6 +342,11 @@ public class AdminController {
             response.setStatus(500);
             response.setMessage("Failed to create Product");
             return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        } catch (IOException e) {
+            response.setStatus(500);
+            response.setMessage("Error processing brand creation: " + e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
