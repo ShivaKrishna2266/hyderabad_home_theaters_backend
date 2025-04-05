@@ -2,6 +2,7 @@ package com.hyderabad_home_theaters.services;
 
 import com.hyderabad_home_theaters.DTOs.LoginDTO;
 import com.hyderabad_home_theaters.DTOs.UserDTO;
+import com.hyderabad_home_theaters.dao.UserDao;
 import com.hyderabad_home_theaters.entity.Role;
 import com.hyderabad_home_theaters.entity.User;
 import com.hyderabad_home_theaters.entity.UserProfile;
@@ -14,7 +15,9 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,6 +33,9 @@ public class UserDetailsService {
     @Autowired
     @Qualifier("passwordEncoder")
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserDao userDao;
 
     @Autowired
     public UserDetailsService(PasswordEncoder passwordEncoder) {
@@ -84,6 +90,16 @@ public class UserDetailsService {
        }
        return  null;
    }
+
+    public List<User> findAll() {
+        List<User> list = new ArrayList<>();
+        userDao.findAll().iterator().forEachRemaining(list::add);
+        return list;
+    }
+
+    public User findOne(String username) {
+        return userDao.findByUsername(username);
+    }
 
 
 }

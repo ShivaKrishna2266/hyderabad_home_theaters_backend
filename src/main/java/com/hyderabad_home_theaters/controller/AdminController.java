@@ -1,20 +1,25 @@
 package com.hyderabad_home_theaters.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyderabad_home_theaters.DTOs.BrandDTO;
 import com.hyderabad_home_theaters.DTOs.CategoryDTO;
 import com.hyderabad_home_theaters.DTOs.ProductDTO;
 import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
+import com.hyderabad_home_theaters.DTOs.TestimonialDTO;
 import com.hyderabad_home_theaters.entity.ApiResponse;
 import com.hyderabad_home_theaters.exception.ResourceNotFoundException;
 import com.hyderabad_home_theaters.services.BrandService;
 import com.hyderabad_home_theaters.services.CategoryService;
 import com.hyderabad_home_theaters.services.ProductService;
 import com.hyderabad_home_theaters.services.SubCategoryService;
+import com.hyderabad_home_theaters.services.TestimonialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -53,6 +59,9 @@ public class AdminController {
     @Autowired
     private SubCategoryService subCategoryService;
 
+    @Autowired
+    private TestimonialService testimonialService;
+
 
     @Value("${file.upload.brand.dir}")
     private String uploadBrandDir;
@@ -62,6 +71,9 @@ public class AdminController {
 
     @Value("${file.upload.product.dir}")
     private String uploadProductDir;
+
+    @Value("${file.upload.testimonial.dir}")
+    private String uploadTestimonialDir;
 
     @GetMapping("/getAllBrands")
     private ResponseEntity<ApiResponse<List<BrandDTO>>> getAllBrands() {
@@ -507,5 +519,108 @@ public class AdminController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    // ==================Testimonial APis======================//
+
+    @GetMapping("/getAllTestimonials")
+    public ResponseEntity<ApiResponse<List<TestimonialDTO>>> getAllTestimonials() {
+        ApiResponse<List<TestimonialDTO>> response = new ApiResponse<>();
+        List<TestimonialDTO> testimonialDTOS = testimonialService.getAllTestimonials();
+        if (testimonialDTOS != null) {
+            response.setStatus(200);
+            response.setMessage("Created testimonial modules successfully!");
+            response.setData(testimonialDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to create  course modules!");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/addTestimonials")
+    public ResponseEntity<ApiResponse<TestimonialDTO>> addTestimonials(
+            @RequestPart("testimonialDTO") String testimonialDTO,
+            @RequestPart("testimonialImageFile") MultipartFile testimonialImageFile) {
+
+        ApiResponse<TestimonialDTO> response = new ApiResponse<>();
+
+        try {
+            // Convert JSON string to DTO object
+            ObjectMapper objectMapper = new ObjectMapper();
+            TestimonialDTO testimonialDtoObj = objectMapper.readValue(testimonialDTO, TestimonialDTO.class);
+
+            // Save image file
+            String fileName = testimonialImageFile.getOriginalFilename();
+            Path filePath = Paths.get(uploadTestimonialDir, fileName);
+
+            Files.createDirectories(filePath.getParent());
+            Files.copy(testimonialImageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Set image filename to DTO
+            testimonialDtoObj.setImage(fileName);
+
+            // Save to DB using service
+            TestimonialDTO savedTestimonial = testimonialService.createTestimonial(testimonialDtoObj);
+
+            if (savedTestimonial != null) {
+                response.setStatus(200);
+                response.setMessage("Successfully added testimonial.");
+                response.setData(savedTestimonial);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                response.setStatus(500);
+                response.setMessage("Failed to create testimonial.");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+
+        } catch (IOException e) {
+            response.setStatus(500);
+            response.setMessage("Error processing testimonial creation: " + e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @PutMapping("/updateTestimonial/{testimonialId}")
+    public ResponseEntity<ApiResponse<TestimonialDTO>> updateTestimonial(@RequestPart("testimonialDTO") String testimonialDTO,
+                                                                         @RequestPart("testimonialImageFile") MultipartFile testimonialImageFile,
+                                                                         @PathVariable Long testimonialId) {
+        ApiResponse<TestimonialDTO> response = new ApiResponse<>();
+        try {
+            // Convert JSON string to DTO object
+            ObjectMapper objectMapper = new ObjectMapper();
+            TestimonialDTO testimonialDtoObj = objectMapper.readValue(testimonialDTO, TestimonialDTO.class);
+
+            // Save image file
+            String fileName = testimonialImageFile.getOriginalFilename();
+            Path filePath = Paths.get(uploadTestimonialDir, fileName);
+
+            Files.createDirectories(filePath.getParent());
+            Files.copy(testimonialImageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Set image filename to DTO
+            testimonialDtoObj.setImage(fileName);
+
+            // Save to DB using service
+            TestimonialDTO updatedTestimonial = testimonialService.updateTestimonial(testimonialId, testimonialDtoObj);
+            if (updatedTestimonial != null) {
+                response.setStatus(200);
+                response.setMessage("Testimonial updated successfully.");
+                response.setData(updatedTestimonial);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                response.setStatus(404);
+                response.setMessage("Testimonial not found.");
+                return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage("Failed to update testimonial: " + e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
 }
