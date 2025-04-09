@@ -82,6 +82,7 @@ public class ProductServiceImpl implements ProductService {
         product.setDimensions(productDTO.getDimensions());
         product.setMaterial(productDTO.getMaterial());
         product.setWarrantyPeriod(productDTO.getWarrantyPeriod());
+        product.setDescription(productDTO.getDescription());
 
         // Set image and status
         product.setImageName(productDTO.getImageName());
@@ -144,6 +145,9 @@ public class ProductServiceImpl implements ProductService {
             product.setDimensions(productDTO.getDimensions());
             product.setMaterial(productDTO.getMaterial());
             product.setWarrantyPeriod(productDTO.getWarrantyPeriod());
+            product.setDescription(productDTO.getDescription());
+
+
 
             // Update timestamps and audit fields
             product.setUpdatedBy("System");

@@ -33,5 +33,6 @@ public class ProductDTO {
     private String dimensions;
     private String material;
     private Integer warrantyPeriod;
+    private String description;
 
 }

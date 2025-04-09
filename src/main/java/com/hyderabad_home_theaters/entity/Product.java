@@ -106,6 +106,8 @@ public class Product {
     @Column(name = "warranty_period")
     private Integer warrantyPeriod; // ❌ Change from String → Integer (e.g., 12 months)
 
+    @Column(name = "description")
+    private String description;
 
 
 

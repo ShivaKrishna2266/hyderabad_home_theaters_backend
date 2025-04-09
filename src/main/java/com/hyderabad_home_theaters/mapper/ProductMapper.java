@@ -36,6 +36,7 @@ public class ProductMapper {
         productDTO.setDimensions(product.getDimensions());
         productDTO.setMaterial(product.getMaterial());
         productDTO.setWarrantyPeriod(product.getWarrantyPeriod());
+        productDTO.setDescription(product.getDescription());
 
         if (product.getBrand() != null) {
             productDTO.setBrandId(product.getBrand().getBrandId());
@@ -76,6 +77,7 @@ public class ProductMapper {
         product.setDimensions(productDTO.getDimensions());
         product.setMaterial(productDTO.getMaterial());
         product.setWarrantyPeriod(productDTO.getWarrantyPeriod());
+        product.setDescription(productDTO.getDescription());
 
         if (productDTO.getBrandId() != null) {
             Brand brand = brandRepository.findById(productDTO.getBrandId())
