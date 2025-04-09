@@ -7,6 +7,7 @@ import com.hyderabad_home_theaters.DTOs.CountryCodeDTO;
 import com.hyderabad_home_theaters.DTOs.GeneralSettingsDTO;
 import com.hyderabad_home_theaters.DTOs.ProductDTO;
 import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
+import com.hyderabad_home_theaters.DTOs.TestimonialDTO;
 import com.hyderabad_home_theaters.entity.ApiResponse;
 import com.hyderabad_home_theaters.exception.ResourceNotFoundException;
 import com.hyderabad_home_theaters.services.BrandService;
@@ -16,6 +17,7 @@ import com.hyderabad_home_theaters.services.CountryCodeService;
 import com.hyderabad_home_theaters.services.GeneralSettingService;
 import com.hyderabad_home_theaters.services.ProductService;
 import com.hyderabad_home_theaters.services.SubCategoryService;
+import com.hyderabad_home_theaters.services.TestimonialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +59,9 @@ public class DataLoaderController {
 
    @Autowired
    private GeneralSettingService generalSettingService;
+
+   @Autowired
+   private TestimonialService testimonialService;
 
 
 
@@ -497,6 +502,26 @@ public class DataLoaderController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+
+    //================================TESTIMONIAL=====================================//
+
+
+    @GetMapping("/getAllTestimonials")
+    public ResponseEntity<ApiResponse<List<TestimonialDTO>>> getAllTestimonials() {
+        ApiResponse<List<TestimonialDTO>> response = new ApiResponse<>();
+        List<TestimonialDTO> testimonialDTOS = testimonialService.getAllTestimonials();
+        if (testimonialDTOS != null) {
+            response.setStatus(200);
+            response.setMessage("Created testimonial modules successfully!");
+            response.setData(testimonialDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to create  course modules!");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }
