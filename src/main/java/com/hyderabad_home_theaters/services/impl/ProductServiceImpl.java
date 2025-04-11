@@ -10,6 +10,7 @@ import com.hyderabad_home_theaters.mapper.ProductMapper;
 import com.hyderabad_home_theaters.repository.BrandRepository;
 import com.hyderabad_home_theaters.repository.CategoryRepository;
 import com.hyderabad_home_theaters.repository.ProductRepository;
+import com.hyderabad_home_theaters.repository.ReviewRepository;
 import com.hyderabad_home_theaters.repository.SubCategoryRepository;
 import com.hyderabad_home_theaters.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,9 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private SubCategoryRepository subCategoryRepository;
 
+    @Autowired
+    private ReviewRepository reviewRepository;
+
 
     @Override
     public List<ProductDTO> getAllProducts() {
@@ -61,7 +65,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
         // Convert DTO to Entity (includes mapping Brand, Category, SubCategory)
-        Product product = ProductMapper.convertToEntity(productDTO, brandRepository, categoryRepository, subCategoryRepository);
+        Product product = ProductMapper.convertToEntity(productDTO, brandRepository, categoryRepository, subCategoryRepository, reviewRepository);
 
         // Set additional fields (in case not handled in mapper)
         product.setProductName(productDTO.getProductName());

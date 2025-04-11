@@ -6,6 +6,7 @@ import com.hyderabad_home_theaters.DTOs.ContactUsDTO;
 import com.hyderabad_home_theaters.DTOs.CountryCodeDTO;
 import com.hyderabad_home_theaters.DTOs.GeneralSettingsDTO;
 import com.hyderabad_home_theaters.DTOs.ProductDTO;
+import com.hyderabad_home_theaters.DTOs.ReviewDTO;
 import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
 import com.hyderabad_home_theaters.DTOs.TestimonialDTO;
 import com.hyderabad_home_theaters.entity.ApiResponse;
@@ -16,6 +17,7 @@ import com.hyderabad_home_theaters.services.ContactUsService;
 import com.hyderabad_home_theaters.services.CountryCodeService;
 import com.hyderabad_home_theaters.services.GeneralSettingService;
 import com.hyderabad_home_theaters.services.ProductService;
+import com.hyderabad_home_theaters.services.ReviewServices;
 import com.hyderabad_home_theaters.services.SubCategoryService;
 import com.hyderabad_home_theaters.services.TestimonialService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +64,9 @@ public class DataLoaderController {
 
    @Autowired
    private TestimonialService testimonialService;
+
+   @Autowired
+   private ReviewServices reviewServices;
 
 
 
@@ -523,5 +528,64 @@ public class DataLoaderController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    //========================REVIEW==========================//
+
+    @GetMapping("/getAllReviews")
+    public ResponseEntity<ApiResponse<List<ReviewDTO>>> getAllReviews() {
+        ApiResponse<List<ReviewDTO>> response = new ApiResponse<>();
+        List<ReviewDTO> reviewDTOS = reviewServices.getAllReviews();
+        if (reviewDTOS != null) {
+            response.setStatus(200);
+            response.setMessage("Created reviews successfully!");
+            response.setData(reviewDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to create  reviews!");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/createReview")
+    public ResponseEntity<ApiResponse<ReviewDTO>> createReview(@RequestBody ReviewDTO reviewDTO) {
+        ApiResponse<ReviewDTO> response = new ApiResponse<>();
+        ReviewDTO reviewDTO1 = reviewServices.createReview(reviewDTO);
+        if (reviewDTO1 != null) {
+            response.setStatus(200);
+            response.setMessage("Created review successfully!");
+            response.setData(reviewDTO1);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to create review!");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
+    @GetMapping("/getProductReviews/{productId}/reviews")
+    public ResponseEntity<ApiResponse<List<ReviewDTO>>> getProductReviews(@PathVariable Long productId) {
+        ApiResponse<List<ReviewDTO>> response = new ApiResponse<>();
+
+        try {
+            List<ReviewDTO> reviews = reviewServices.getReviewByProductId(productId);
+            response.setStatus(200);
+            response.setMessage("Get Product review successfully!");
+            response.setData(reviews);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage("Failed to get Product reviews!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
+
 
 }
