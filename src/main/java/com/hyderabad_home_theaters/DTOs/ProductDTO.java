@@ -21,6 +21,7 @@ public class ProductDTO {
     private Long categoryId;
     private Long brandId;
     private Long subCategoryId;
+    private Long reviewId;
 
     private Double originalPrice;
     private Double discountedPrice;

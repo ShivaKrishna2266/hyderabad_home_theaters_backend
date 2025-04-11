@@ -4,9 +4,11 @@ import com.hyderabad_home_theaters.DTOs.ProductDTO;
 import com.hyderabad_home_theaters.entity.Brand;
 import com.hyderabad_home_theaters.entity.Category;
 import com.hyderabad_home_theaters.entity.Product;
+import com.hyderabad_home_theaters.entity.Review;
 import com.hyderabad_home_theaters.entity.SubCategory;
 import com.hyderabad_home_theaters.repository.BrandRepository;
 import com.hyderabad_home_theaters.repository.CategoryRepository;
+import com.hyderabad_home_theaters.repository.ReviewRepository;
 import com.hyderabad_home_theaters.repository.SubCategoryRepository;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +49,9 @@ public class ProductMapper {
         if (product.getSubCategory() != null) {
             productDTO.setSubCategoryId(product.getSubCategory().getSubCategoryId());
         }
+        if (product.getReview() != null){
+            productDTO.setReviewId(product.getReview().getReviewId());
+        }
 
         return productDTO;
     }
@@ -54,7 +59,8 @@ public class ProductMapper {
     public static Product convertToEntity(ProductDTO productDTO,
                                           BrandRepository brandRepository,
                                           CategoryRepository categoryRepository,
-                                          SubCategoryRepository subCategoryRepository) {
+                                          SubCategoryRepository subCategoryRepository,
+                                          ReviewRepository reviewRepository) {
 
         Product product = new Product();
         product.setProductId(productDTO.getProductId());
@@ -95,6 +101,11 @@ public class ProductMapper {
             SubCategory subCategory = subCategoryRepository.findById(productDTO.getSubCategoryId())
                     .orElseThrow(() -> new RuntimeException("SubCategory ID not found"));
             product.setSubCategory(subCategory);
+        }
+
+        if(productDTO.getReviewId() != null){
+            Review review = reviewRepository.findById(productDTO.getReviewId()).orElseThrow( () ->new RuntimeException("Review ID not found"));
+            product.setReview(review);
         }
 
         return product;

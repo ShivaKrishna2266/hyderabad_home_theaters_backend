@@ -1,5 +1,6 @@
 package com.hyderabad_home_theaters.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -8,11 +9,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -60,6 +64,10 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sub_category_id", referencedColumnName = "sub_category_id")
     private SubCategory subCategory;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "review_id",referencedColumnName = "review_id")
+    private Review review;
 
     @Column(name = "createdBy")
     private String createdBy;
@@ -109,7 +117,6 @@ public class Product {
     @Column(name = "description")
     private String description;
 
-
-
-
+//    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+//    private List<Review> review = new ArrayList<>();
 }
