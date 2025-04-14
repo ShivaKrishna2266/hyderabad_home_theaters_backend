@@ -16,6 +16,7 @@ public class ReviewDTO {
     private String email;
     private Integer rating;
     private String review;
+    private  String headline;
     private String image;
     private String status;
     private String createdBy;

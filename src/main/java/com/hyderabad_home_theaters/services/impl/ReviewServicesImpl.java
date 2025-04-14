@@ -1,22 +1,21 @@
 package com.hyderabad_home_theaters.services.impl;
 
-import com.hyderabad_home_theaters.DTOs.ProductDTO;
 import com.hyderabad_home_theaters.DTOs.ReviewDTO;
-import com.hyderabad_home_theaters.entity.Brand;
+import com.hyderabad_home_theaters.constants.AppConstants;
 import com.hyderabad_home_theaters.entity.Product;
 import com.hyderabad_home_theaters.entity.Review;
-import com.hyderabad_home_theaters.mapper.ProductMapper;
+import com.hyderabad_home_theaters.entity.User;
 import com.hyderabad_home_theaters.mapper.ReviewMapper;
 import com.hyderabad_home_theaters.repository.ProductRepository;
 import com.hyderabad_home_theaters.repository.ReviewRepository;
 import com.hyderabad_home_theaters.services.ReviewServices;
+import com.hyderabad_home_theaters.services.UserDetailsService;
+import com.hyderabad_home_theaters.util.JwtTokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,6 +32,9 @@ public class ReviewServicesImpl implements ReviewServices {
 
     @Autowired
     private ReviewMapper reviewMapper;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Override
     public List<ReviewDTO> getAllReviews() {
@@ -53,6 +55,8 @@ public class ReviewServicesImpl implements ReviewServices {
     public ReviewDTO createReview(ReviewDTO reviewDTO) {
 
         Review review = reviewMapper.toEntity(reviewDTO, productRepository);
+
+        review.setStatus(AppConstants.ACTIVE);
         review.setCreatedBy("System");
         review.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
         review.setUpdatedBy("System");
@@ -78,6 +82,7 @@ public class ReviewServicesImpl implements ReviewServices {
             review.setImage(reviewDTO.getImage());
             review.setRating(reviewDTO.getRating());
             review.setStatus(reviewDTO.getStatus());
+            review.setHeadline(reviewDTO.getHeadline());
             review.setUpdatedBy("System");
             review.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
 

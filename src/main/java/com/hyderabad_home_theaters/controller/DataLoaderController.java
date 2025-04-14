@@ -1,5 +1,6 @@
 package com.hyderabad_home_theaters.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyderabad_home_theaters.DTOs.BrandDTO;
 import com.hyderabad_home_theaters.DTOs.CategoryDTO;
 import com.hyderabad_home_theaters.DTOs.ContactUsDTO;
@@ -21,6 +22,7 @@ import com.hyderabad_home_theaters.services.ReviewServices;
 import com.hyderabad_home_theaters.services.SubCategoryService;
 import com.hyderabad_home_theaters.services.TestimonialService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -31,8 +33,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.PrivateKey;
 import java.util.List;
 
@@ -67,6 +76,10 @@ public class DataLoaderController {
 
    @Autowired
    private ReviewServices reviewServices;
+
+
+    @Value("${file.upload.review.dir}")
+    private String uploadReviewDir;
 
 
 
@@ -548,18 +561,45 @@ public class DataLoaderController {
     }
 
     @PostMapping("/createReview")
-    public ResponseEntity<ApiResponse<ReviewDTO>> createReview(@RequestBody ReviewDTO reviewDTO) {
+    public ResponseEntity<ApiResponse<ReviewDTO>> createReview(
+            @RequestPart("reviewDTO") String reviewDTO,
+            @RequestPart("reviewImageFile") MultipartFile reviewImageFile) {
+
         ApiResponse<ReviewDTO> response = new ApiResponse<>();
-        ReviewDTO reviewDTO1 = reviewServices.createReview(reviewDTO);
-        if (reviewDTO1 != null) {
-            response.setStatus(200);
-            response.setMessage("Created review successfully!");
-            response.setData(reviewDTO1);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } else {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            // Convert JSON string to DTO object
+            ReviewDTO reviewDtoObj = objectMapper.readValue(reviewDTO, ReviewDTO.class);
+
+            // Save the uploaded image
+            String fileName = System.currentTimeMillis() + "_" + reviewImageFile.getOriginalFilename();
+            Path filePath = Paths.get(uploadReviewDir, fileName);
+
+            Files.createDirectories(filePath.getParent());
+            Files.copy(reviewImageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Set the saved image filename in the DTO
+            reviewDtoObj.setImage(fileName);
+
+            // Create review via service
+            ReviewDTO savedReview = reviewServices.createReview(reviewDtoObj);
+
+            if (savedReview != null) {
+                response.setStatus(200);
+                response.setMessage("Review created successfully!");
+                response.setData(savedReview);
+                return ResponseEntity.ok(response);
+            } else {
+                response.setStatus(500);
+                response.setMessage("Failed to create review!");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+
+        } catch (IOException e) {
             response.setStatus(500);
-            response.setMessage("Failed to create review!");
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            response.setMessage("Error processing review creation: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 

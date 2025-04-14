@@ -18,6 +18,8 @@ public class ReviewMapper {
         dto.setImage(review.getImage());
         dto.setRating(review.getRating());
         dto.setStatus(review.getStatus());
+        dto.setReview(review.getReview());
+        dto.setHeadline(review.getHeadline());
 
         if (review.getProduct() != null) {
             dto.setProductId(review.getProduct().getProductId());
@@ -34,6 +36,8 @@ public class ReviewMapper {
         review.setImage(dto.getImage());
         review.setRating(dto.getRating());
         review.setStatus(dto.getStatus());
+        review.setReview(dto.getReview());
+        review.setHeadline(dto.getHeadline());
 
         if (dto.getReviewId() != null) {
             Product  product = productRepository.findById(dto.getProductId())
