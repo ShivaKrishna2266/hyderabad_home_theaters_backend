@@ -7,6 +7,7 @@ import com.hyderabad_home_theaters.DTOs.ContactUsDTO;
 import com.hyderabad_home_theaters.DTOs.CountryCodeDTO;
 import com.hyderabad_home_theaters.DTOs.GeneralSettingsDTO;
 import com.hyderabad_home_theaters.DTOs.ProductDTO;
+import com.hyderabad_home_theaters.DTOs.QuestionsDTO;
 import com.hyderabad_home_theaters.DTOs.ReviewDTO;
 import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
 import com.hyderabad_home_theaters.DTOs.TestimonialDTO;
@@ -18,6 +19,7 @@ import com.hyderabad_home_theaters.services.ContactUsService;
 import com.hyderabad_home_theaters.services.CountryCodeService;
 import com.hyderabad_home_theaters.services.GeneralSettingService;
 import com.hyderabad_home_theaters.services.ProductService;
+import com.hyderabad_home_theaters.services.QuestionsServices;
 import com.hyderabad_home_theaters.services.ReviewServices;
 import com.hyderabad_home_theaters.services.SubCategoryService;
 import com.hyderabad_home_theaters.services.TestimonialService;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,6 +47,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.PrivateKey;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
@@ -77,9 +81,15 @@ public class DataLoaderController {
    @Autowired
    private ReviewServices reviewServices;
 
+   @Autowired
+   private QuestionsServices questionsServices;
+
 
     @Value("${file.upload.review.dir}")
     private String uploadReviewDir;
+
+    @Value("${file.upload.question.dir}")
+    private String uploadQuestionDir;
 
 
 
@@ -564,27 +574,16 @@ public class DataLoaderController {
     public ResponseEntity<ApiResponse<ReviewDTO>> createReview(
             @RequestPart("reviewDTO") String reviewDTO,
             @RequestPart("reviewImageFile") MultipartFile reviewImageFile) {
-
         ApiResponse<ReviewDTO> response = new ApiResponse<>();
-        ObjectMapper objectMapper = new ObjectMapper();
-
         try {
-            // Convert JSON string to DTO object
+            ObjectMapper objectMapper = new ObjectMapper();
             ReviewDTO reviewDtoObj = objectMapper.readValue(reviewDTO, ReviewDTO.class);
-
-            // Save the uploaded image
-            String fileName = System.currentTimeMillis() + "_" + reviewImageFile.getOriginalFilename();
+            String fileName = reviewImageFile.getOriginalFilename();
             Path filePath = Paths.get(uploadReviewDir, fileName);
-
             Files.createDirectories(filePath.getParent());
             Files.copy(reviewImageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            // Set the saved image filename in the DTO
             reviewDtoObj.setImage(fileName);
-
-            // Create review via service
             ReviewDTO savedReview = reviewServices.createReview(reviewDtoObj);
-
             if (savedReview != null) {
                 response.setStatus(200);
                 response.setMessage("Review created successfully!");
@@ -595,16 +594,12 @@ public class DataLoaderController {
                 response.setMessage("Failed to create review!");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
             }
-
         } catch (IOException e) {
             response.setStatus(500);
             response.setMessage("Error processing review creation: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
-
-
     @GetMapping("/getProductReviews/{productId}/reviews")
     public ResponseEntity<ApiResponse<List<ReviewDTO>>> getProductReviews(@PathVariable Long productId) {
         ApiResponse<List<ReviewDTO>> response = new ApiResponse<>();
@@ -626,6 +621,114 @@ public class DataLoaderController {
 
 
 
+    //========================QUESTIONS==========================//
 
+    @GetMapping("/getAllQuestions")
+    public ResponseEntity<ApiResponse<List<QuestionsDTO>>> getAllQuestions() {
+        ApiResponse<List<QuestionsDTO>> response = new ApiResponse<>();
+        List<QuestionsDTO> questionsDTOS = questionsServices.getAllQuestions();
+        if (questionsDTOS != null) {
+            response.setStatus(200);
+            response.setMessage("Created Question successfully!");
+            response.setData(questionsDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to create  Question!");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/getQuestionById/{questionId}")
+    public ResponseEntity<ApiResponse<QuestionsDTO>> getQuestionById(@PathVariable Long questionId) {
+        ApiResponse<QuestionsDTO> response = new ApiResponse<>();
+        QuestionsDTO questionsDTOS = questionsServices.getQuestionById(questionId);
+
+        if (questionsDTOS != null) {
+            response.setStatus(200);
+            response.setMessage("Get Question By Id successfully!");
+            response.setData(questionsDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to get Question By Id!");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/createQuestion")
+    public ResponseEntity<ApiResponse<QuestionsDTO>> createQuestion(@RequestPart("questionDTO") String questionsDTO,
+                                                                    @RequestPart("questionImageFile") MultipartFile questionImageFile) {
+        ApiResponse<QuestionsDTO> response = new ApiResponse<>();
+
+        try {
+            // Convert JSON string to DTO object
+            ObjectMapper objectMapper = new ObjectMapper();
+            QuestionsDTO questionsDTODtoObj = objectMapper.readValue(questionsDTO, QuestionsDTO.class);
+
+            // Save image file
+            String fileName = questionImageFile.getOriginalFilename();
+            Path filePath = Paths.get(uploadQuestionDir, fileName);
+
+            Files.createDirectories(filePath.getParent());
+            Files.copy(questionImageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Set image filename to DTO
+            questionsDTODtoObj.setImage(fileName);
+
+            // Save to DB using service
+        QuestionsDTO savedQuestion = questionsServices.createQuestion(questionsDTODtoObj);
+        if (savedQuestion != null) {
+            response.setStatus(200);
+            response.setMessage("Get Question By Id successfully!");
+            response.setData(savedQuestion);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to get Question By Id!");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        } catch (IOException e) {
+            response.setStatus(500);
+            response.setMessage("Error processing testimonial creation: " + e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/updateQuestionById/{questionId}")
+    public ResponseEntity<ApiResponse<QuestionsDTO>> updateQuestion(@PathVariable Long questionId,
+                                                                    @RequestBody QuestionsDTO questionsDTO) {
+            ApiResponse<QuestionsDTO> response = new ApiResponse<>();
+            QuestionsDTO updatedQuestion = questionsServices.updateQuestion(questionId, questionsDTO);
+            if (updatedQuestion != null) {
+                response.setStatus(200);
+                response.setMessage("Question updated successfully!");
+                response.setData(updatedQuestion);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            }else {
+                response.setStatus(500);
+                response.setMessage("Failed to update question");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+    }
+
+    @GetMapping("/getProductQuestion/{productId}/question")
+    public ResponseEntity<ApiResponse<List<QuestionsDTO>>> getProductQuestion(@PathVariable Long productId) {
+        ApiResponse<List<QuestionsDTO>> response = new ApiResponse<>();
+
+        try {
+            List<QuestionsDTO> questionsDTOS = questionsServices.getQuestionByProductId(productId);
+            response.setStatus(200);
+            response.setMessage("Get Product question successfully!");
+            response.setData(questionsDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage("Failed to get Product question!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }
