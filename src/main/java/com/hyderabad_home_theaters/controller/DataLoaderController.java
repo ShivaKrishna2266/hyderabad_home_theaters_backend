@@ -266,6 +266,24 @@ public class DataLoaderController {
         }
     }
 
+
+    @GetMapping("/getProductByCategory/{categoryId}")
+    public ResponseEntity<ApiResponse<List<ProductDTO>>> getProductByCategory(@PathVariable Long categoryId){
+        ApiResponse<List<ProductDTO>> response = new ApiResponse<>();
+        List<ProductDTO> productDTOS = productService.getProductsByCategory(categoryId);
+        if (productDTOS != null){
+            response.setStatus(200);
+            response.setMessage("Successfully Fetched  a Product By Category!");
+            response.setData(productDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to Product By Category!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     //===================Product============================//
 
 

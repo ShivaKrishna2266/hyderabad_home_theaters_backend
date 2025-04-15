@@ -190,6 +190,17 @@ public class ProductServiceImpl implements ProductService {
         return productDTOS.isEmpty() ? Collections.emptyList() : productDTOS;
     }
 
+    @Override
+    public List<ProductDTO> getProductsByCategory(Long categoryId) {
+        List<Product> products = productRepository.findByCategoryId(categoryId);
+        List<ProductDTO> productDTOS = new ArrayList<>();
+
+        for (Product product : products) {
+            ProductDTO dto = ProductMapper.convertToDTO(product);
+            productDTOS.add(dto);
+        }
+        return productDTOS.isEmpty() ? Collections.emptyList() : productDTOS;
+    }
 
 
     @Override
