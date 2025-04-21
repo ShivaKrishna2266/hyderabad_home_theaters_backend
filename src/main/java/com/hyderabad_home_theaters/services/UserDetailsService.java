@@ -1,11 +1,16 @@
 package com.hyderabad_home_theaters.services;
 
 import com.hyderabad_home_theaters.DTOs.LoginDTO;
+import com.hyderabad_home_theaters.DTOs.ProfileDTO;
 import com.hyderabad_home_theaters.DTOs.UserDTO;
 import com.hyderabad_home_theaters.dao.UserDao;
+import com.hyderabad_home_theaters.entity.Address;
+import com.hyderabad_home_theaters.entity.Customer;
 import com.hyderabad_home_theaters.entity.Role;
 import com.hyderabad_home_theaters.entity.User;
 import com.hyderabad_home_theaters.entity.UserProfile;
+import com.hyderabad_home_theaters.repository.AddressRepository;
+import com.hyderabad_home_theaters.repository.CustomerRepository;
 import com.hyderabad_home_theaters.repository.UserProfileRepository;
 import com.hyderabad_home_theaters.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +43,9 @@ public class UserDetailsService {
     private UserDao userDao;
 
     @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
     public UserDetailsService(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
@@ -45,6 +53,9 @@ public class UserDetailsService {
     public String encodePassword(String rawPassword) {
         return passwordEncoder.encode(rawPassword);
     }
+
+    @Autowired
+    private AddressRepository addressRepository;
 
 
     public UserDTO registerUser(UserDTO request){
@@ -78,10 +89,40 @@ public class UserDetailsService {
         return request;
    }
 
-   public User findByUserName(String username){
+   public User findByUsername(String username){
        return userRepository.findByUsername(username)
                .orElseThrow(() -> new RuntimeException("User Not Found"));
    }
+
+
+
+    public ProfileDTO getProfileUsername(String username) {
+        ProfileDTO profileDTO = new ProfileDTO();
+        UserProfile userProfile = userProfileRepository.findByUsername(username);
+        if(userProfile!=null) {
+            profileDTO.setEmail(userProfile.getEmail());
+//            profileDTO.setFirstName(userProfile.getUsername());
+//            profileDTO.setSurname(userProfile.get());
+            profileDTO.setUsername(userProfile.getUsername());
+            profileDTO.setFullName(userProfile.getUsername());
+            profileDTO.setMobileNumber(userProfile.getMobileNumber());
+            List<Address> addressList = addressRepository.findByCustomerId(userProfile.getProfileId());
+            if(addressList!=null && addressList.size()>0) {
+                Address address = addressList.get(0);
+                profileDTO.setAddressLine1(address.getAddressLine1());
+                profileDTO.setAddressLine2(address.getAddressLine2());
+                profileDTO.setLandmark(address.getLandmark());
+                profileDTO.setArea(address.getArea());
+                profileDTO.setCity(address.getCity());
+                profileDTO.setState(address.getState());
+                profileDTO.setCountry(address.getCountry());
+                profileDTO.setRegion(address.getRegion());
+                profileDTO.setPostCode(address.getPinCode());
+            }
+            return profileDTO;
+        }
+        return null;
+    }
 
    public User logInUser(LoginDTO loginDTO){
        Optional<User> user =userRepository.findByUsername(loginDTO.getUsername());
