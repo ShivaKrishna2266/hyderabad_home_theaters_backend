@@ -11,21 +11,15 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 public class OrderDTO {
 
-    private Long orderId;
+    private  Long orderId;
     private Long userId;
-    private String productName;
-    private Integer quantity;
-    private Double totalPrice;
-    private String status; // PENDING, PAID, SHIPPED, etc.
-    private String paymentId;
+    private String username;
+    private String razorpayPaymentId;
     private String razorpayOrderId;
     private String razorpaySignature;
-    private String customerName;
     private String email;
     private String mobileNumber;
+    private String amount;
     private String profile;
-    private String createdBy;
-    private Timestamp createdDate;
-    private String updatedBy;
-    private Timestamp updatedDate;
+    private String orderStatus;
 }
