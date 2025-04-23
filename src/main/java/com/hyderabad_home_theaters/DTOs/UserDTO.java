@@ -16,6 +16,7 @@ public class UserDTO {
     private String phoneNumber;
     private String password;
     private String role;
+    private String otp;
     private String createdBy;
     private Timestamp createDate;
     private String updatedBy;

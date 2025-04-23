@@ -6,6 +6,7 @@ import com.hyderabad_home_theaters.DTOs.CategoryDTO;
 import com.hyderabad_home_theaters.DTOs.ContactUsDTO;
 import com.hyderabad_home_theaters.DTOs.CountryCodeDTO;
 import com.hyderabad_home_theaters.DTOs.GeneralSettingsDTO;
+import com.hyderabad_home_theaters.DTOs.OtpVerificationDTO;
 import com.hyderabad_home_theaters.DTOs.ProductDTO;
 import com.hyderabad_home_theaters.DTOs.QuestionsDTO;
 import com.hyderabad_home_theaters.DTOs.ReviewDTO;
@@ -18,6 +19,7 @@ import com.hyderabad_home_theaters.services.CategoryService;
 import com.hyderabad_home_theaters.services.ContactUsService;
 import com.hyderabad_home_theaters.services.CountryCodeService;
 import com.hyderabad_home_theaters.services.GeneralSettingService;
+import com.hyderabad_home_theaters.services.OtpVerificationServices;
 import com.hyderabad_home_theaters.services.ProductService;
 import com.hyderabad_home_theaters.services.QuestionsServices;
 import com.hyderabad_home_theaters.services.ReviewServices;
@@ -83,6 +85,8 @@ public class DataLoaderController {
 
    @Autowired
    private QuestionsServices questionsServices;
+   @Autowired
+   private OtpVerificationServices otpVerificationServices;
 
 
     @Value("${file.upload.review.dir}")
@@ -745,6 +749,80 @@ public class DataLoaderController {
             response.setStatus(500);
             response.setMessage("Failed to get Product question!");
             response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+//=======================OtpNotification===================================//
+        @GetMapping("/getAllOTPs")
+        public ResponseEntity<ApiResponse<List<OtpVerificationDTO>>> getAllOTPs() {
+            ApiResponse<List<OtpVerificationDTO>> response = new ApiResponse<>();
+            List<OtpVerificationDTO> otpdtos = otpVerificationServices.getAllOTPs();
+
+            if (otpdtos != null && !otpdtos.isEmpty()) {
+                response.setStatus(200);
+                response.setMessage("Successfully get All OTPs!");
+                response.setData(otpdtos);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                response.setStatus(500);
+                response.setMessage("Failed to Get All OTPs are not found.");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+
+    @PostMapping("/createOTPs")
+    public ResponseEntity<ApiResponse<OtpVerificationDTO>> createOTPs(@RequestBody OtpVerificationDTO otpVerificationDTO) {
+        ApiResponse<OtpVerificationDTO> response = new ApiResponse<>();
+        try {
+            OtpVerificationDTO savedOTPDTO = otpVerificationServices.createOtpVerification(otpVerificationDTO);
+            if (savedOTPDTO != null) {
+                response.setStatus(200);
+                response.setMessage("Created a OTP successfully!");
+                response.setData(savedOTPDTO);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                response.setStatus(500);
+                response.setMessage("Failed to retrieve OTP or no OTP found.");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage("Failed to create a Enquiry!");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/updateOTP/{otpId}")
+    public ResponseEntity<ApiResponse<OtpVerificationDTO>> updateOTP(@PathVariable Long otpId,
+                                                         @RequestBody OtpVerificationDTO otpVerificationDTO) {
+        ApiResponse<OtpVerificationDTO> response = new ApiResponse<>();
+        OtpVerificationDTO updatedOTP = otpVerificationServices.updateOtpVerifications(otpId, otpVerificationDTO);
+        if (updatedOTP != null) {
+            response.setStatus(200);
+            response.setMessage("OTP updated successfully");
+            response.setData(updatedOTP);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed To Update OTP");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/updateOTPStatus/{otpId}/{otpStatus}")
+    public ResponseEntity<ApiResponse<OtpVerificationDTO>> updateOTPStatus(@PathVariable Long otpId,
+                                                               @PathVariable String otpStatus) {
+        ApiResponse<OtpVerificationDTO> response = new ApiResponse<>();
+        OtpVerificationDTO OTPDTOs = otpVerificationServices.updateOtpVerificationStatus(otpId,otpStatus);
+        if (OTPDTOs != null) {
+            response.setStatus(200);
+            response.setMessage("Updated a OTP successfully!");
+            response.setData(OTPDTOs);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to fetch");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

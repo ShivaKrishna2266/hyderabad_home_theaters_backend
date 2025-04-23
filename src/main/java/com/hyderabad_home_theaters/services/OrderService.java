@@ -33,6 +33,7 @@ public class OrderService {
         order.setRazorpayOrderId(razorpayOrderId);
         order.setUserId(orderRequest.getUserId());
         order.setAmount(orderRequest.getAmount());
+//        order.setProfile(orderRequest.getProfile().toString());
         order.setEmail(orderRequest.getEmail());
         order.setMobileNumber(orderRequest.getMobileNumber());
         order.setCustomerName(orderRequest.getCustomerName());
