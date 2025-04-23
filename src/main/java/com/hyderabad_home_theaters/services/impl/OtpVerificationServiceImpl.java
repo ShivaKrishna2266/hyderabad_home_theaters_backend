@@ -32,6 +32,7 @@ public class OtpVerificationServiceImpl implements OtpVerificationServices {
     public OtpVerificationDTO createOtpVerification(OtpVerificationDTO otpVerificationDTO) throws ApplicationBusinessException {
         try {
             OtpVerification entity = OtpVerificationMapper.convertToEntity(otpVerificationDTO);
+            entity.setOtpCode(otpVerificationDTO.getOtpCode());  // Ensure OTP is set
             entity.setCreatedBy("System");
             entity.setUpdatedBy("System");
             entity.setCreatedAt(new Timestamp(System.currentTimeMillis()));
@@ -84,10 +85,18 @@ public class OtpVerificationServiceImpl implements OtpVerificationServices {
         return OtpVerificationMapper.convertToDTO(otpOpt);
     }
 
-//    @Override
-//    public OtpVerificationDTO verifyOtpByMobileNumberAndOtpCode(String mobileNumber, String otpCode) throws ApplicationBusinessException {
-//        throw new ApplicationBusinessException("verifyOtpByMobileNumberAndOtpCode is not supported: no otpCode present.");
-//    }
+    @Override
+    public OtpVerificationDTO verifyOtpByMobileNumberAndOtpCode(String mobileNumber, String otpCode) throws ApplicationBusinessException {
+        Optional<OtpVerification> otpOptional = otpRepo.findByMobileNumberAndOtpCode(mobileNumber, otpCode);
+        if (!otpOptional.isPresent()) {
+            throw new ApplicationBusinessException("OTP not found for mobile number: " + mobileNumber + " and OTP code: " + otpCode);
+        }
+        OtpVerification otpCode1 = otpOptional.get();
+        otpCode1.setOtpStatus("Verified");
+        otpRepo.save(otpCode1);
+        return OtpVerificationMapper.convertToDTO(otpCode1);
+    }
+
 
     @Override
     public boolean validateOtp(String mobileNumber, String otpStatus) {

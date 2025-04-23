@@ -17,7 +17,7 @@ public interface OtpVerificationServices {
 
     OtpVerificationDTO getOtpByMobileNumber(String mobileNumber) throws ApplicationBusinessException;
 
-//    OtpVerificationDTO verifyOtpByMobileNumberAndOtpCode(String mobileNumber) throws ApplicationBusinessException;
+    OtpVerificationDTO verifyOtpByMobileNumberAndOtpCode(String mobileNumber, String otpCode) throws ApplicationBusinessException;
     boolean validateOtp(String phoneNumber, String otpStatus);
 
 

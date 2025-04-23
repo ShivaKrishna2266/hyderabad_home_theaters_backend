@@ -2,13 +2,17 @@ package com.hyderabad_home_theaters.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyderabad_home_theaters.DTOs.LoginDTO;
+import com.hyderabad_home_theaters.DTOs.OtpVerificationDTO;
 import com.hyderabad_home_theaters.DTOs.ProfileDTO;
 import com.hyderabad_home_theaters.DTOs.UserDTO;
+import com.hyderabad_home_theaters.DTOs.WatiTemplateRequestDTO;
 import com.hyderabad_home_theaters.config.CustomUserDetailsService;
 import com.hyderabad_home_theaters.config.JwtUtil;
 import com.hyderabad_home_theaters.entity.Role;
 import com.hyderabad_home_theaters.entity.User;
+import com.hyderabad_home_theaters.entity.WatiTemplatesResponse;
 import com.hyderabad_home_theaters.services.UserDetailsService;
+import com.hyderabad_home_theaters.services.WatiService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping
@@ -42,14 +47,31 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // Register a new user
-    @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserDTO request) {
-        userDetailsService.registerUser(request);
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "User registered successfully");
 
-        return ResponseEntity.ok(response);
+    @Autowired
+    private WatiService watiService;
+
+    private Map<String, String> otpStore = new ConcurrentHashMap<>();
+
+    // Register a new user
+//    @PostMapping("/register")
+//    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserDTO request) {
+//        userDetailsService.registerUser(request);
+//        Map<String, String> response = new HashMap<>();
+//        response.put("message", "User registered successfully");
+//
+//        return ResponseEntity.ok(response);
+//    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> registerUser(@RequestBody UserDTO request) {
+        try {
+            // Register user and send OTP
+            userDetailsService.registerUser(request);
+            return ResponseEntity.ok("OTP sent. Please verify your OTP to complete registration.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
 
@@ -81,7 +103,7 @@ public class AuthController {
             jsonResponse.put("role", user.getRoles().stream().findFirst().get().getRoleName());
             jsonResponse.put("username", user.getUsername());
             jsonResponse.put("token", jwt);
-            jsonResponse.put("profile", profileJson != null ? profileJson : "");
+            jsonResponse.put("profile", profileDTO); // ✅ send as object
 
             // Add Authorization header
             HttpHeaders headers = new HttpHeaders();
@@ -92,6 +114,37 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Incorrect username or password");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Authentication failed");
+        }
+    }
+
+
+
+    @PostMapping("/send-otp")
+    public ResponseEntity<String> sendOtp(@RequestParam String phoneNumber) {
+        WatiTemplatesResponse response = watiService.sendWatiOTP(phoneNumber);
+        otpStore.put(phoneNumber, response.getOtp()); // Store OTP temporarily
+        return ResponseEntity.ok("OTP sent");
+    }
+
+//    @PostMapping("/verify-otp")
+//    public ResponseEntity<String> verifyOtpAndRegister(@RequestBody UserDTO request) {
+//        try {
+//            // Verify OTP and complete registration
+//            userDetailsService.verifyOtpAndRegisterUser(request);
+//            return ResponseEntity.ok("Registration successful!");
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+//        }
+//    }
+
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<String> verifyOtpAndRegister(@RequestBody UserDTO request) {
+        try {
+            userDetailsService.verifyOtpAndRegisterUser(request);
+            return ResponseEntity.ok("Registration successful!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("OTP verification failed: " + e.getMessage());
         }
     }
     }

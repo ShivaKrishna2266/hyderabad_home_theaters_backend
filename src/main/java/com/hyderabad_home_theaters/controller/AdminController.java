@@ -9,12 +9,14 @@ import com.hyderabad_home_theaters.DTOs.ProductDTO;
 import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
 import com.hyderabad_home_theaters.DTOs.TestimonialDTO;
 import com.hyderabad_home_theaters.entity.ApiResponse;
+import com.hyderabad_home_theaters.entity.MessageTemplate;
 import com.hyderabad_home_theaters.exception.ResourceNotFoundException;
 import com.hyderabad_home_theaters.services.BrandService;
 import com.hyderabad_home_theaters.services.CategoryService;
 import com.hyderabad_home_theaters.services.ProductService;
 import com.hyderabad_home_theaters.services.SubCategoryService;
 import com.hyderabad_home_theaters.services.TestimonialService;
+import com.hyderabad_home_theaters.services.WatiService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -61,6 +63,10 @@ public class AdminController {
 
     @Autowired
     private TestimonialService testimonialService;
+
+
+    @Autowired
+    private WatiService watiService;
 
 
     @Value("${file.upload.brand.dir}")
@@ -620,6 +626,55 @@ public class AdminController {
             response.setMessage("Failed to update testimonial: " + e.getMessage());
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+
+//    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/sendWatiSMSForAllUsers/{templateName}/{role}")
+    public ResponseEntity<ApiResponse> sendWatiSMSForAllUsers(@PathVariable String templateName,
+                                                                 @PathVariable String role) throws Exception {
+        ApiResponse response = new ApiResponse<>();
+        watiService.sendWatiSMSByRole(templateName, role);
+        try {
+            if (response != null) {
+                response.setStatus(200);
+                response.setMessage("sendWatiSMSByRole messages sent successfully.");
+                response.setData(null);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                response.setStatus(500);
+                response.setMessage("Failed to send sendWatiSMSByRole.");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage("Failed to send WhatsAppDailyLeads messages.");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/getTemplateMessages")
+    public ResponseEntity<ApiResponse<List<MessageTemplate>>> getTemplateMessages() {
+        ApiResponse<List<MessageTemplate>> response = new ApiResponse<>();
+        List<MessageTemplate> messageTemplates = watiService.getTemplateMessages();
+        try {
+            if (messageTemplates != null) {
+                response.setStatus(200);
+                response.setMessage("fetched all MessageTemplates Successfully");
+                response.setData(messageTemplates);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                response.setStatus(500);
+                response.setMessage("Failed to fetched all MessageTemplates");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+
+            }
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage("Failed to send WhatsAppDailyLeads messages.");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
 

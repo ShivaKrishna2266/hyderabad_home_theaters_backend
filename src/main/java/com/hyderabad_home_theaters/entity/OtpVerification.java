@@ -34,6 +34,9 @@ public class OtpVerification {
     @Column(name = "otp")
     private String otp;
 
+    @Column(name = "otp_code")
+    private String otpCode;
+
     @Column(name = "otp_status")
     private  String otpStatus;
 
