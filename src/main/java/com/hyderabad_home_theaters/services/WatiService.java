@@ -1,5 +1,6 @@
 package com.hyderabad_home_theaters.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyderabad_home_theaters.DTOs.WatiParameters;
 import com.hyderabad_home_theaters.DTOs.WatiTemplateRequestDTO;
 import com.hyderabad_home_theaters.constants.AppConstants;
@@ -11,11 +12,7 @@ import com.opencsv.CSVWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -25,15 +22,15 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class WatiService {
 
-
     @Value("${wati.templates.url}")
-    private String watiTtemplatesUrl;
+    private String watiTemplatesUrl;
 
     @Value("${wati.token}")
     private String token;
@@ -50,52 +47,89 @@ public class WatiService {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Get all message templates from WATI API
+     */
     public List<MessageTemplate> getTemplateMessages() {
-        RestTemplate rt = new RestTemplate();
+        RestTemplate restTemplate = new RestTemplate();
+
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", token);
-        HttpEntity<Object> entity = new HttpEntity<Object>(headers);
-        ResponseEntity<WatiTemplatesResponse> exchange = rt.exchange(watiTtemplatesUrl, HttpMethod.GET, entity,
-                WatiTemplatesResponse.class);
-        WatiTemplatesResponse body = exchange.getBody();
-        return body.getMessageTemplates();
+
+        HttpEntity<Object> entity = new HttpEntity<>(headers);
+        ResponseEntity<WatiTemplatesResponse> response = restTemplate.exchange(
+                watiTemplatesUrl,
+                HttpMethod.GET,
+                entity,
+                WatiTemplatesResponse.class
+        );
+
+        WatiTemplatesResponse responseBody = response.getBody();
+        if (responseBody != null) {
+            return responseBody.getMessageTemplates();
+        }
+        return List.of();
     }
 
+    /**
+     * Send WATI broadcast SMS to users based on role
+     */
     public void sendWatiSMSByRole(String templateName, String role) throws Exception {
-        RestTemplate rt = new RestTemplate();
+        RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", token);
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        String filePath = "output3.csv";
+
+        String filePath = "output_users.csv";
         String[] header = {"Name", "CountryCode", "Phone", "AllowBroadcast", "AllowSMS"};
+
         try (CSVWriter writer = new CSVWriter(new FileWriter(filePath))) {
             writer.writeNext(header);
 
             if (AppConstants.USER.equals(role)) {
                 List<User> users = userRepository.findAll();
-                users.forEach(user -> writer.writeNext(new String[]{user.getUsername(),
-                        user.getPhoneNumber(), "TRUE", "TRUE"}));
-            } else{
-
+                for (User user : users) {
+                    writer.writeNext(new String[]{
+                            user.getUsername(),
+                            "+91", // Assuming country code is India
+                            user.getPhoneNumber(),
+                            "TRUE",
+                            "TRUE"
+                    });
+                }
+            } else {
+                throw new IllegalArgumentException("Invalid role provided: " + role);
             }
+
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error writing CSV file", e);
         }
+
         File file = new File(filePath);
         body.add(AppConstants.WHATSAPP_NUMBERS_CSV, new FileSystemResource(file));
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-        sendTemplateCsvUrl = sendTemplateCsvUrl + "?template_name=" + templateName + "&broadcast_name=" + templateName
-                + "_bd";
-        ResponseEntity<String> response = rt.postForEntity(sendTemplateCsvUrl, requestEntity, String.class);
+        String fullApiUrl = sendTemplateCsvUrl + "?template_name=" + templateName + "&broadcast_name=" + templateName + "_bd";
+
+        ResponseEntity<String> response = restTemplate.postForEntity(fullApiUrl, requestEntity, String.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Failed to send WATI SMS: " + response.getBody());
+        }
+
+        // Clean up
         file.delete();
     }
 
+    /**
+     * Send OTP using WATI template message API
+     */
     public WatiTemplatesResponse sendWatiOTP(String phno) {
-
         RestTemplate rt = new RestTemplate();
         String apiUrl = watiTemplateMsgApiUrl + "?whatsappNumber=" + phno;
+
 
         String otp = generateOTP();
 
@@ -110,12 +144,20 @@ public class WatiService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<WatiTemplateRequestDTO> requestEntity = new HttpEntity<>(requestDTO, headers);
         ResponseEntity<WatiTemplatesResponse> response = rt.postForEntity(apiUrl, requestEntity, WatiTemplatesResponse.class);
-        response.getBody().setOtp(otp);
-        return response.getBody();
+
+        if (response.getBody() != null) {
+            response.getBody().setOtp(otp);
+            return response.getBody();
+        } else {
+            throw new RuntimeException("Failed to send OTP via WATI");
+        }
     }
+
+
 
 
     private String generateOTP() {

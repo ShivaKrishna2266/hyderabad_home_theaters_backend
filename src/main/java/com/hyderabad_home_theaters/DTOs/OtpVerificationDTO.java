@@ -15,6 +15,7 @@ public class OtpVerificationDTO {
     private String email;
     private String mobileNumber;
     private String otp;
+    private String otpCode;
     private String otpStatus;
     private Timestamp createdAt;
     private String createdBy;
