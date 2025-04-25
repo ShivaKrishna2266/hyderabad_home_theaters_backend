@@ -53,7 +53,7 @@ public class AuthController {
 
     private Map<String, String> otpStore = new ConcurrentHashMap<>();
 
-    // Register a new user
+//     Register a new user
 //    @PostMapping("/register")
 //    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserDTO request) {
 //        userDetailsService.registerUser(request);
@@ -64,13 +64,16 @@ public class AuthController {
 //    }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody UserDTO request) {
+    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserDTO request) {
+        Map<String, String> response = new HashMap<>();
         try {
             // Register user and send OTP
             userDetailsService.registerUser(request);
-            return ResponseEntity.ok("OTP sent. Please verify your OTP to complete registration.");
+            response.put("message", "OTP sent. Please verify your OTP to complete registration.");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
@@ -78,26 +81,20 @@ public class AuthController {
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(@RequestBody LoginDTO request) {
         try {
-            // Perform authentication and capture the Authentication object
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
 
-            // Generate JWT using the Authentication object
             String jwt = jwtUtil.generateToken(authentication);
 
-            // Load user details and entity
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(request.getUsername());
             User user = userDetailsService.findByUsername(request.getUsername());
 
-            // Get profile
             ProfileDTO profileDTO = userDetailsService.getProfileUsername(user.getUsername());
 
-            // Convert profileDTO to JSON
             ObjectMapper objectMapper = new ObjectMapper();
             String profileJson = objectMapper.writeValueAsString(profileDTO);
 
-            // Prepare JSON response
             JSONObject jsonResponse = new JSONObject();
             jsonResponse.put("userId", user.getUserId());
             jsonResponse.put("role", user.getRoles().stream().findFirst().get().getRoleName());
@@ -105,7 +102,6 @@ public class AuthController {
             jsonResponse.put("token", jwt);
             jsonResponse.put("profile", profileDTO); // ✅ send as object
 
-            // Add Authorization header
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + jwt);
 
@@ -120,10 +116,14 @@ public class AuthController {
 
 
     @PostMapping("/send-otp")
-    public ResponseEntity<String> sendOtp(@RequestParam String phoneNumber) {
+    public ResponseEntity<Map<String, String>> sendOtp(@RequestParam String phoneNumber) {
         WatiTemplatesResponse response = watiService.sendWatiOTP(phoneNumber);
         otpStore.put(phoneNumber, response.getOtp()); // Store OTP temporarily
-        return ResponseEntity.ok("OTP sent");
+
+        Map<String, String> result = new HashMap<>();
+        result.put("message", "OTP sent successfully");
+
+        return ResponseEntity.ok(result);
     }
 
 //    @PostMapping("/verify-otp")
@@ -139,12 +139,16 @@ public class AuthController {
 
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<String> verifyOtpAndRegister(@RequestBody UserDTO request) {
+    public ResponseEntity<Map<String, String>> verifyOtpAndRegister(@RequestBody UserDTO request) {
+        Map<String, String> response = new HashMap<>();
+
         try {
             userDetailsService.verifyOtpAndRegisterUser(request);
-            return ResponseEntity.ok("Registration successful!");
+            response.put("message", "Registration successful!");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("OTP verification failed: " + e.getMessage());
+            response.put("error", "OTP verification failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
     }

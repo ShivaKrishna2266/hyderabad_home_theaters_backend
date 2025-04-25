@@ -28,7 +28,8 @@ public class SecurityConfig {
                 .and()
                 .csrf(csrf -> csrf.disable())  // Disable CSRF if using JWTs (recommended for stateless sessions)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("register", "authenticate","/data/**", "/actuator/**").permitAll()
+//                        .requestMatchers("register", "authenticate","/data/**", "/actuator/**").permitAll()
+                        .requestMatchers("/register", "/authenticate", "/verify-otp", "/send-otp", "/data/**", "/actuator/**", "/order/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/order/**").permitAll()
