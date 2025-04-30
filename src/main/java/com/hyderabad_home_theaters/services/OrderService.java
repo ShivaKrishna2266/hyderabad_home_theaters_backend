@@ -1,9 +1,12 @@
 package com.hyderabad_home_theaters.services;
 
 import com.hyderabad_home_theaters.DTOs.OrderDTO;
+import com.hyderabad_home_theaters.DTOs.UserDTO;
 import com.hyderabad_home_theaters.DTOs.payment.OrderRequest;
 import com.hyderabad_home_theaters.entity.Orders;
+import com.hyderabad_home_theaters.entity.User;
 import com.hyderabad_home_theaters.mapper.OrderMapper;
+import com.hyderabad_home_theaters.mapper.UserMapper;
 import com.hyderabad_home_theaters.repository.OrderRepository;
 import com.hyderabad_home_theaters.util.Signature;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -82,4 +86,32 @@ public class OrderService {
         existingOrder = orderRepository.save(existingOrder);
         return 	 OrderMapper.convertToDTO(existingOrder);
     }
+
+    @Transactional
+    public OrderDTO getOrderById(Long orderId){
+        Optional<Orders> optionalOrders = orderRepository.findById(orderId);
+        if(optionalOrders.isPresent()){
+            Orders orders = optionalOrders.get();
+            return OrderMapper.convertToDTO(orders);
+        }else {
+            return null;
+        }
+    }
+
+//    @Transactional
+//    public List<OrderDTO> getOrdersByUserId(Long userId) {
+//        List<Orders> orders = orderRepository.findByUserId(userId);
+//        return orders.stream()
+//                .map(order -> {
+//                    OrderDTO dto = new OrderDTO();
+//                    dto.setOrderId(order.getOrderId());
+//                    dto.setOrderStatus(order.getOrderStatus());
+//                    dto.setUsername(order.getCustomerName());
+//                    dto.setEmail(order.getEmail());
+//                    dto.setAmount(String.valueOf(order.getAmount()));
+//                    // set other fields as needed
+//                    return dto;
+//                })
+//                .collect(Collectors.toList());
+//    }
 }

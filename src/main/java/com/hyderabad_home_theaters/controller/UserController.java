@@ -1,13 +1,20 @@
 package com.hyderabad_home_theaters.controller;
 
 import com.hyderabad_home_theaters.DTOs.BrandDTO;
+import com.hyderabad_home_theaters.DTOs.OrderDTO;
+import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
+import com.hyderabad_home_theaters.DTOs.UserDTO;
 import com.hyderabad_home_theaters.entity.ApiResponse;
+import com.hyderabad_home_theaters.entity.Orders;
 import com.hyderabad_home_theaters.services.BrandService;
+import com.hyderabad_home_theaters.services.OrderService;
+import com.hyderabad_home_theaters.services.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +29,14 @@ public class UserController {
 
     @Autowired
     private BrandService brandService;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private OrderService orderService;
+
+
 
     @GetMapping("/getAllBrands")
     public ResponseEntity<ApiResponse<List<BrandDTO>>> getAllBrands() {
@@ -55,4 +70,56 @@ public class UserController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    @GetMapping("/getUserById/{userId}")
+    public ResponseEntity<ApiResponse<UserDTO>> getUserById(@PathVariable Long userId){
+        ApiResponse<UserDTO>  response = new ApiResponse<>();
+        UserDTO userDTOs = userDetailsService.getUserById(userId);
+        if (userDTOs != null){
+            response.setStatus(200);
+            response.setMessage("Fetch User By Id Data Successfully");
+            response.setData(userDTOs);
+            return  new ResponseEntity<>(response, HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed To Fetch User By Id Data");
+            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @GetMapping("/getOrderById/{orderId}")
+    public ResponseEntity<ApiResponse<OrderDTO>> getOrderById(@PathVariable Long orderId){
+        ApiResponse<OrderDTO>  response = new ApiResponse<>();
+        OrderDTO orderDTO = orderService.getOrderById(orderId);
+        if (orderDTO != null){
+            response.setStatus(200);
+            response.setMessage("Fetch Order By Id Data Successfully");
+            response.setData(orderDTO);
+            return  new ResponseEntity<>(response, HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed To Fetch Order By Id Data");
+            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+//    @GetMapping("/getOrdersByUserId/{userId}")
+//    public ResponseEntity<ApiResponse<List<OrderDTO>>> getOrdersByUserId(@PathVariable Long userId){
+//        ApiResponse<List<OrderDTO>>  response = new ApiResponse<>();
+//        List<OrderDTO> orderDTO = orderService.getOrdersByUserId(userId);
+//        if (orderDTO != null){
+//            response.setStatus(200);
+//            response.setMessage("Fetch Order By Id  User Data Successfully");
+//            response.setData(orderDTO);
+//            return  new ResponseEntity<>(response, HttpStatus.OK);
+//        }else {
+//            response.setStatus(500);
+//            response.setMessage("Failed To Fetch Order By Id SuerData");
+//            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
+
 }
