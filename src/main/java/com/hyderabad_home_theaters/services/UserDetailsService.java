@@ -1,10 +1,13 @@
 package com.hyderabad_home_theaters.services;
 
+import com.hyderabad_home_theaters.DTOs.CategoryDTO;
 import com.hyderabad_home_theaters.DTOs.LoginDTO;
 import com.hyderabad_home_theaters.DTOs.ProfileDTO;
 import com.hyderabad_home_theaters.DTOs.UserDTO;
 import com.hyderabad_home_theaters.dao.UserDao;
 import com.hyderabad_home_theaters.entity.*;
+import com.hyderabad_home_theaters.mapper.CategoryMapper;
+import com.hyderabad_home_theaters.mapper.UserMapper;
 import com.hyderabad_home_theaters.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -141,5 +144,15 @@ public class UserDetailsService {
     }
     public User findOne(String username) {
         return userDao.findByUsername(username);
+    }
+
+    public UserDTO getUserById(Long userId){
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if(optionalUser.isPresent()){
+            User user = optionalUser.get();
+            return UserMapper.convertedToDTO(user);
+        }else {
+            return null;
+        }
     }
 }

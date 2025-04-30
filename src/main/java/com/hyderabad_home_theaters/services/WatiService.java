@@ -1,6 +1,5 @@
 package com.hyderabad_home_theaters.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyderabad_home_theaters.DTOs.WatiParameters;
 import com.hyderabad_home_theaters.DTOs.WatiTemplateRequestDTO;
 import com.hyderabad_home_theaters.constants.AppConstants;
@@ -22,15 +21,16 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class WatiService {
 
     @Value("${wati.templates.url}")
-    private String watiTemplatesUrl;
+    private String watiTtemplatesUrl;
 
     @Value("${wati.token}")
     private String token;
@@ -51,24 +51,14 @@ public class WatiService {
      * Get all message templates from WATI API
      */
     public List<MessageTemplate> getTemplateMessages() {
-        RestTemplate restTemplate = new RestTemplate();
-
+        RestTemplate rt = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", token);
-
-        HttpEntity<Object> entity = new HttpEntity<>(headers);
-        ResponseEntity<WatiTemplatesResponse> response = restTemplate.exchange(
-                watiTemplatesUrl,
-                HttpMethod.GET,
-                entity,
-                WatiTemplatesResponse.class
-        );
-
-        WatiTemplatesResponse responseBody = response.getBody();
-        if (responseBody != null) {
-            return responseBody.getMessageTemplates();
-        }
-        return List.of();
+        HttpEntity<Object> entity = new HttpEntity<Object>(headers);
+        ResponseEntity<WatiTemplatesResponse> exchange = rt.exchange(watiTtemplatesUrl, HttpMethod.GET, entity,
+                WatiTemplatesResponse.class);
+        WatiTemplatesResponse body = exchange.getBody();
+        return body.getMessageTemplates();
     }
 
     /**
@@ -127,9 +117,9 @@ public class WatiService {
      * Send OTP using WATI template message API
      */
     public WatiTemplatesResponse sendWatiOTP(String phno) {
+
         RestTemplate rt = new RestTemplate();
         String apiUrl = watiTemplateMsgApiUrl + "?whatsappNumber=" + phno;
-
 
         String otp = generateOTP();
 
@@ -144,18 +134,13 @@ public class WatiService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", token);
-        headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<WatiTemplateRequestDTO> requestEntity = new HttpEntity<>(requestDTO, headers);
         ResponseEntity<WatiTemplatesResponse> response = rt.postForEntity(apiUrl, requestEntity, WatiTemplatesResponse.class);
-
-        if (response.getBody() != null) {
-            response.getBody().setOtp(otp);
-            return response.getBody();
-        } else {
-            throw new RuntimeException("Failed to send OTP via WATI");
-        }
+        response.getBody().setOtp(otp);
+        return response.getBody();
     }
+
 
 
 
