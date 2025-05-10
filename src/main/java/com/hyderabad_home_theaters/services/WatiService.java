@@ -4,8 +4,10 @@ import com.hyderabad_home_theaters.DTOs.WatiParameters;
 import com.hyderabad_home_theaters.DTOs.WatiTemplateRequestDTO;
 import com.hyderabad_home_theaters.constants.AppConstants;
 import com.hyderabad_home_theaters.entity.MessageTemplate;
+import com.hyderabad_home_theaters.entity.OtpVerification;
 import com.hyderabad_home_theaters.entity.User;
 import com.hyderabad_home_theaters.entity.WatiTemplatesResponse;
+import com.hyderabad_home_theaters.repository.OtpVerificationRepository;
 import com.hyderabad_home_theaters.repository.UserRepository;
 import com.opencsv.CSVWriter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +17,14 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -46,6 +47,9 @@ public class WatiService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private OtpVerificationRepository otpVerificationRepository;
 
     /**
      * Get all message templates from WATI API
@@ -116,30 +120,54 @@ public class WatiService {
     /**
      * Send OTP using WATI template message API
      */
-    public WatiTemplatesResponse sendWatiOTP(String phno) {
-
-        RestTemplate rt = new RestTemplate();
-        String apiUrl = watiTemplateMsgApiUrl + "?whatsappNumber=" + phno;
-
+    public WatiTemplatesResponse sendWatiOTP(String phoneNumber) {
         String otp = generateOTP();
+        System.out.println("Generated OTP: " + otp);
 
-        WatiParameters params = new WatiParameters();
-        params.setName("otp");
-        params.setValue(otp);
+        if (!phoneNumber.startsWith("+")) {
+            phoneNumber = "+91" + phoneNumber;
+        }
+
+        System.out.println("Sending OTP to: " + phoneNumber);
+
+        WatiParameters param = new WatiParameters();
+        param.setName("otp");
+        param.setValue(otp);
 
         WatiTemplateRequestDTO requestDTO = new WatiTemplateRequestDTO();
         requestDTO.setTemplate_name(watiOtpTemplateName);
         requestDTO.setBroadcast_name(watiOtpTemplateName);
-        requestDTO.setParameters(Arrays.asList(params));
+        requestDTO.setParameters(Collections.singletonList(param));
+
+
+        String apiUrl = "https://live-server-5866.wati.io/api/v1/sendTemplateMessage?whatsappNumber=" + phoneNumber;
+
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", token);
 
-        HttpEntity<WatiTemplateRequestDTO> requestEntity = new HttpEntity<>(requestDTO, headers);
-        ResponseEntity<WatiTemplatesResponse> response = rt.postForEntity(apiUrl, requestEntity, WatiTemplatesResponse.class);
-        response.getBody().setOtp(otp);
-        return response.getBody();
+        HttpEntity<WatiTemplateRequestDTO> request = new HttpEntity<>(requestDTO, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        try {
+            ResponseEntity<WatiTemplatesResponse> response = restTemplate.postForEntity(
+                    apiUrl, request, WatiTemplatesResponse.class);
+
+            System.out.println("Response: " + response.getBody());
+
+            response.getBody().setOtp(otp);
+
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            System.out.println("Error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            throw new RuntimeException("Failed to send OTP: " + e.getMessage(), e);
+        }
     }
+
+
+
+
 
 
 

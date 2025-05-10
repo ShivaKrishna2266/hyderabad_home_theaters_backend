@@ -98,20 +98,20 @@ public class OrderService {
         }
     }
 
-//    @Transactional
-//    public List<OrderDTO> getOrdersByUserId(Long userId) {
-//        List<Orders> orders = orderRepository.findByUserId(userId);
-//        return orders.stream()
-//                .map(order -> {
-//                    OrderDTO dto = new OrderDTO();
-//                    dto.setOrderId(order.getOrderId());
-//                    dto.setOrderStatus(order.getOrderStatus());
-//                    dto.setUsername(order.getCustomerName());
-//                    dto.setEmail(order.getEmail());
-//                    dto.setAmount(String.valueOf(order.getAmount()));
-//                    // set other fields as needed
-//                    return dto;
-//                })
-//                .collect(Collectors.toList());
-//    }
+    @Transactional
+    public List<OrderDTO> getOrdersByUserId(Long userId) {
+        List<Orders> orders = orderRepository.findOrdersByUserId(userId);
+        return orders.stream()
+                .map(order -> {
+                    OrderDTO dto = new OrderDTO();
+                    dto.setOrderId(order.getOrderId());
+                    dto.setOrderStatus(order.getOrderStatus());
+                    dto.setUsername(order.getCustomerName());
+                    dto.setEmail(order.getEmail());
+                    dto.setAmount(String.valueOf(order.getAmount()));
+                    // set other fields as needed
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 }

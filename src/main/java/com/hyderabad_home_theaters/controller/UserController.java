@@ -106,20 +106,20 @@ public class UserController {
     }
 
 
-//    @GetMapping("/getOrdersByUserId/{userId}")
-//    public ResponseEntity<ApiResponse<List<OrderDTO>>> getOrdersByUserId(@PathVariable Long userId){
-//        ApiResponse<List<OrderDTO>>  response = new ApiResponse<>();
-//        List<OrderDTO> orderDTO = orderService.getOrdersByUserId(userId);
-//        if (orderDTO != null){
-//            response.setStatus(200);
-//            response.setMessage("Fetch Order By Id  User Data Successfully");
-//            response.setData(orderDTO);
-//            return  new ResponseEntity<>(response, HttpStatus.OK);
-//        }else {
-//            response.setStatus(500);
-//            response.setMessage("Failed To Fetch Order By Id SuerData");
-//            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
+    @GetMapping("/getOrdersByUserId/{userId}")
+    public ResponseEntity<ApiResponse<List<OrderDTO>>> getOrdersByUserId(@PathVariable Long userId){
+        ApiResponse<List<OrderDTO>>  response = new ApiResponse<>();
+        List<OrderDTO> orderDTO = orderService.getOrdersByUserId(userId);
+        if (orderDTO != null){
+            response.setStatus(200);
+            response.setMessage("Fetch Order By Id  User Data Successfully");
+            response.setData(orderDTO);
+            return  new ResponseEntity<>(response, HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed To Fetch Order By Id SuerData");
+            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }
