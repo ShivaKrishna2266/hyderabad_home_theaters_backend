@@ -89,8 +89,9 @@ public class AuthController {
 
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(request.getUsername());
             User user = userDetailsService.findByUsername(request.getUsername());
-
             ProfileDTO profileDTO = userDetailsService.getProfileUsername(user.getUsername());
+
+
 
             ObjectMapper objectMapper = new ObjectMapper();
             String profileJson = objectMapper.writeValueAsString(profileDTO);

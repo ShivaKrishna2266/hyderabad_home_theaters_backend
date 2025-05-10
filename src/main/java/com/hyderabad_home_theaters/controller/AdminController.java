@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyderabad_home_theaters.DTOs.BrandDTO;
 import com.hyderabad_home_theaters.DTOs.CategoryDTO;
 import com.hyderabad_home_theaters.DTOs.ProductDTO;
+import com.hyderabad_home_theaters.DTOs.QuestionsDTO;
+import com.hyderabad_home_theaters.DTOs.ReviewDTO;
 import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
 import com.hyderabad_home_theaters.DTOs.TestimonialDTO;
 import com.hyderabad_home_theaters.entity.ApiResponse;
@@ -14,6 +16,8 @@ import com.hyderabad_home_theaters.exception.ResourceNotFoundException;
 import com.hyderabad_home_theaters.services.BrandService;
 import com.hyderabad_home_theaters.services.CategoryService;
 import com.hyderabad_home_theaters.services.ProductService;
+import com.hyderabad_home_theaters.services.QuestionsServices;
+import com.hyderabad_home_theaters.services.ReviewServices;
 import com.hyderabad_home_theaters.services.SubCategoryService;
 import com.hyderabad_home_theaters.services.TestimonialService;
 import com.hyderabad_home_theaters.services.WatiService;
@@ -67,6 +71,12 @@ public class AdminController {
 
     @Autowired
     private WatiService watiService;
+
+    @Autowired
+    private ReviewServices reviewServices;
+
+    @Autowired
+    private QuestionsServices questionsServices;
 
 
     @Value("${file.upload.brand.dir}")
@@ -675,6 +685,118 @@ public class AdminController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+
+    //========================REVIEW==========================//
+
+    @GetMapping("/getAllReviews")
+    public ResponseEntity<ApiResponse<List<ReviewDTO>>> getAllReviews() {
+        ApiResponse<List<ReviewDTO>> response = new ApiResponse<>();
+        List<ReviewDTO> reviewDTOS = reviewServices.getAllReviews();
+        if (reviewDTOS != null) {
+            response.setStatus(200);
+            response.setMessage("Created reviews successfully!");
+            response.setData(reviewDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to create  reviews!");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @GetMapping("/getProductReviews/{productId}/reviews")
+    public ResponseEntity<ApiResponse<List<ReviewDTO>>> getProductReviews(@PathVariable Long productId) {
+        ApiResponse<List<ReviewDTO>> response = new ApiResponse<>();
+
+        try {
+            List<ReviewDTO> reviews = reviewServices.getReviewByProductId(productId);
+            response.setStatus(200);
+            response.setMessage("Get Product review successfully!");
+            response.setData(reviews);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage("Failed to get Product reviews!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    //========================QUESTIONS==========================//
+
+    @GetMapping("/getAllQuestions")
+    public ResponseEntity<ApiResponse<List<QuestionsDTO>>> getAllQuestions() {
+        ApiResponse<List<QuestionsDTO>> response = new ApiResponse<>();
+        List<QuestionsDTO> questionsDTOS = questionsServices.getAllQuestions();
+        if (questionsDTOS != null) {
+            response.setStatus(200);
+            response.setMessage("Created Question successfully!");
+            response.setData(questionsDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to create  Question!");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/getQuestionById/{questionId}")
+    public ResponseEntity<ApiResponse<QuestionsDTO>> getQuestionById(@PathVariable Long questionId) {
+        ApiResponse<QuestionsDTO> response = new ApiResponse<>();
+        QuestionsDTO questionsDTOS = questionsServices.getQuestionById(questionId);
+
+        if (questionsDTOS != null) {
+            response.setStatus(200);
+            response.setMessage("Get Question By Id successfully!");
+            response.setData(questionsDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to get Question By Id!");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @PutMapping("/updateQuestionById/{questionId}")
+    public ResponseEntity<ApiResponse<QuestionsDTO>> updateQuestion(@PathVariable Long questionId,
+                                                                    @RequestBody QuestionsDTO questionsDTO) {
+        ApiResponse<QuestionsDTO> response = new ApiResponse<>();
+        QuestionsDTO updatedQuestion = questionsServices.updateQuestion(questionId, questionsDTO);
+        if (updatedQuestion != null) {
+            response.setStatus(200);
+            response.setMessage("Question updated successfully!");
+            response.setData(updatedQuestion);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed to update question");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/getProductQuestion/{productId}/question")
+    public ResponseEntity<ApiResponse<List<QuestionsDTO>>> getProductQuestion(@PathVariable Long productId) {
+        ApiResponse<List<QuestionsDTO>> response = new ApiResponse<>();
+
+        try {
+            List<QuestionsDTO> questionsDTOS = questionsServices.getQuestionByProductId(productId);
+            response.setStatus(200);
+            response.setMessage("Get Product question successfully!");
+            response.setData(questionsDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage("Failed to get Product question!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 

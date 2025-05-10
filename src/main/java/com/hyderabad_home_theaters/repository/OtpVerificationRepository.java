@@ -1,6 +1,7 @@
 package com.hyderabad_home_theaters.repository;
 
 import com.hyderabad_home_theaters.entity.OtpVerification;
+import com.hyderabad_home_theaters.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
