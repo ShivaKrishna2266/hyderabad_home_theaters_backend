@@ -52,4 +52,9 @@ public class UserProfile {
     @JoinColumn(name = "address")
     private Address address;
 
+    @ManyToOne
+    @JoinColumn(name = "customer")
+    private Customer customer;
+
+
 }

@@ -100,6 +100,7 @@ public class UserDetailsService {
         userProfile.setUsername(request.getUsername());
         userProfile.setEmail(request.getEmail());
         userProfile.setMobileNumber(request.getPhoneNumber());
+        userProfile.setPassword(request.getPassword());
         userProfile.setCreatedBy("System");
         userProfile.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
         userProfile.setUpdatedBy("System");

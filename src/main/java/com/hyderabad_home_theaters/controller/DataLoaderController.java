@@ -8,6 +8,7 @@ import com.hyderabad_home_theaters.DTOs.CountryCodeDTO;
 import com.hyderabad_home_theaters.DTOs.GeneralSettingsDTO;
 import com.hyderabad_home_theaters.DTOs.OtpVerificationDTO;
 import com.hyderabad_home_theaters.DTOs.ProductDTO;
+import com.hyderabad_home_theaters.DTOs.ProfileDTO;
 import com.hyderabad_home_theaters.DTOs.QuestionsDTO;
 import com.hyderabad_home_theaters.DTOs.ReviewDTO;
 import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
@@ -25,6 +26,7 @@ import com.hyderabad_home_theaters.services.QuestionsServices;
 import com.hyderabad_home_theaters.services.ReviewServices;
 import com.hyderabad_home_theaters.services.SubCategoryService;
 import com.hyderabad_home_theaters.services.TestimonialService;
+import com.hyderabad_home_theaters.services.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -87,6 +89,9 @@ public class DataLoaderController {
    private QuestionsServices questionsServices;
    @Autowired
    private OtpVerificationServices otpVerificationServices;
+
+   @Autowired
+   private UserProfileService userProfileService;
 
 
     @Value("${file.upload.review.dir}")
@@ -823,6 +828,28 @@ public class DataLoaderController {
         } else {
             response.setStatus(500);
             response.setMessage("Failed to fetch");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/createProfile")
+    public ResponseEntity<ApiResponse<ProfileDTO>> createProfile(@RequestBody ProfileDTO profileDTO) {
+        ApiResponse<ProfileDTO> response = new ApiResponse<>();
+        try {
+            ProfileDTO saveProfileDTO = userProfileService.createProfile(profileDTO);
+            if (saveProfileDTO != null) {
+                response.setStatus(200);
+                response.setMessage("Created a ProfileDTO successfully!");
+                response.setData(saveProfileDTO);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                response.setStatus(500);
+                response.setMessage("Failed to retrieve ProfileDTO or no ProfileDTO found.");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (Exception e) {
+            response.setStatus(500);
+            response.setMessage("Failed to ProfileDTO a Enquiry!");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

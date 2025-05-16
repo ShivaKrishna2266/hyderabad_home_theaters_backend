@@ -12,6 +12,7 @@ import com.hyderabad_home_theaters.entity.Role;
 import com.hyderabad_home_theaters.entity.User;
 import com.hyderabad_home_theaters.entity.WatiTemplatesResponse;
 import com.hyderabad_home_theaters.services.UserDetailsService;
+import com.hyderabad_home_theaters.services.UserProfileService;
 import com.hyderabad_home_theaters.services.WatiService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,21 +48,14 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private UserProfileService userProfileService;
+
 
     @Autowired
     private WatiService watiService;
 
     private Map<String, String> otpStore = new ConcurrentHashMap<>();
-
-//     Register a new user
-//    @PostMapping("/register")
-//    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserDTO request) {
-//        userDetailsService.registerUser(request);
-//        Map<String, String> response = new HashMap<>();
-//        response.put("message", "User registered successfully");
-//
-//        return ResponseEntity.ok(response);
-//    }
 
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserDTO request) {
@@ -87,10 +81,10 @@ public class AuthController {
 
             String jwt = jwtUtil.generateToken(authentication);
 
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(request.getUsername());
+//            UserDetails userDetails = customUserDetailsService.loadUserByUsername(request.getUsername());
             User user = userDetailsService.findByUsername(request.getUsername());
             ProfileDTO profileDTO = userDetailsService.getProfileUsername(user.getUsername());
-
+//            ProfileDTO profileDTO = userProfileService.getByFirstName(user.getUsername());
 
 
             ObjectMapper objectMapper = new ObjectMapper();
@@ -101,7 +95,9 @@ public class AuthController {
             jsonResponse.put("role", user.getRoles().stream().findFirst().get().getRoleName());
             jsonResponse.put("username", user.getUsername());
             jsonResponse.put("token", jwt);
-            jsonResponse.put("profile", profileDTO); // ✅ send as object
+            jsonResponse.put("profile",profileJson!=null?profileJson:"" );
+
+//            jsonResponse.put("profile", profileDTO);
 
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.AUTHORIZATION, "Bearer " + jwt);
