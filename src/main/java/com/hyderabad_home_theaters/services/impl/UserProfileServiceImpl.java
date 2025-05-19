@@ -30,7 +30,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
 
     @Override
-    public ProfileDTO getByFirstName(String firstName) {
+    public ProfileDTO getUserByFirstName(String firstName) {
         ProfileDTO profileDTO = new ProfileDTO();
         Customer customer = customerRepository.findByFirstName(firstName);
         if(customer!=null) {
@@ -141,4 +141,64 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         return profileDTO;
     }
+
+
+
+//    @Transactional
+//    public void updateUserProfile(OrderRequest orderRequest) {
+//        if (orderRequest == null || orderRequest.getProfile() == null) return;
+//
+//        ProfileDTO profile = orderRequest.getProfile();
+//
+//        // Step 1: Find or create Customer
+//        Customer customer = customerRepository.findByFirstName(orderRequest.getCustomerName());
+//
+//        if (customer == null) {
+//            customer = new Customer();
+//            customer.setCreatedBy("SYSTEM");
+//            customer.setCreatedDate(new Timestamp(new Date().getTime()));
+//        }
+//        customer.setFirstName(profile.getFirstName());
+//        customer.setSurname(profile.getSurname());
+//        customer.setFullName(profile.getFullName());
+//        customer.setEmail(orderRequest.getEmail());
+//        customer.setMobileNumber(orderRequest.getMobileNumber());
+//        customer = customerRepository.save(customer);
+//
+//        // Step 2: Find or create UserProfile
+//        UserProfile userProfile = userProfileRepository.findByCustomer_CustomerId(customer.getCustomerId()).orElse(null);
+//        if (userProfile == null) {
+//            userProfile = new UserProfile();
+//            userProfile.setCustomer(customer);
+//            userProfile.setCreatedBy("SYSTEM");
+//            userProfile.setCreatedDate(new Timestamp(new Date().getTime()));
+//        }
+//        userProfile.setUsername(orderRequest.getCustomerName());
+//        userProfile.setMobileNumber(orderRequest.getMobileNumber());
+//        userProfile.setEmail(orderRequest.getEmail());
+//        userProfileRepository.save(userProfile);
+//
+//        // Step 3: Find or create Address
+//        Address address = addressRepository.findFirstByCustomerId(customer.getCustomerId()).orElse(null);
+//
+//        if (address == null) {
+//            address = new Address();
+//            address.setCustomerId(customer.getCustomerId());
+//            address.setUserProfile(userProfile); // only if Address has this as a @ManyToOne
+//            address.setCreatedBy("SYSTEM");
+//            address.setCreatedDate(new Timestamp(new Date().getTime()));
+//        }
+//
+//        address.setAddressLine1(profile.getAddressLine1());
+//        address.setAddressLine2(profile.getAddressLine2());
+//        address.setLandmark(profile.getLandmark());
+//        address.setArea(profile.getArea());
+//        address.setCity(profile.getCity());
+//        address.setState(profile.getState());
+//        address.setCountry(profile.getCountry());
+//        address.setRegion(profile.getRegion());
+//        address.setPinCode(profile.getPostCode());
+//
+//        addressRepository.save(address);
+//    }
 }

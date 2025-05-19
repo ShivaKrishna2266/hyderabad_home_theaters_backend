@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,6 +51,8 @@ public class OrderController {
     public ResponseEntity<?> createOrder(@RequestBody OrderRequest orderRequest) {
         OrderResponse razorPay = null;
         try {
+
+//            orderService.updateUserProfile(orderRequest);
             String amountInPaise = convertRupeeToPaise(orderRequest.getAmount());
             Order order = createRazorPayOrder(amountInPaise, orderRequest);
             razorPay = getOrderResponse((String) order.get("id"), amountInPaise);
@@ -107,7 +110,8 @@ public class OrderController {
     }
 
     @PutMapping("/{orderStatus}")
-    public OrderDTO getOrderByStatus(@RequestBody OrderDTO orderDTO) {
+    public OrderDTO getOrderByStatus(@PathVariable String orderStatus, @RequestBody OrderDTO orderDTO) {
+        orderDTO.setOrderStatus(orderStatus); // optionally set in DTO
         return orderService.getOrderByStatus(orderDTO);
     }
 }

@@ -71,4 +71,8 @@ public class Address {
 
     @Column(name = "customer_id")
     private Long customerId;
+
+//    @ManyToOne
+//    @JoinColumn(name = "customer_id")
+//    private Customer customer;
 }

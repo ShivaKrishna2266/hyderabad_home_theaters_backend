@@ -2,6 +2,7 @@ package com.hyderabad_home_theaters.controller;
 
 import com.hyderabad_home_theaters.DTOs.BrandDTO;
 import com.hyderabad_home_theaters.DTOs.OrderDTO;
+import com.hyderabad_home_theaters.DTOs.ProfileDTO;
 import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
 import com.hyderabad_home_theaters.DTOs.UserDTO;
 import com.hyderabad_home_theaters.entity.ApiResponse;
@@ -9,6 +10,7 @@ import com.hyderabad_home_theaters.entity.Orders;
 import com.hyderabad_home_theaters.services.BrandService;
 import com.hyderabad_home_theaters.services.OrderService;
 import com.hyderabad_home_theaters.services.UserDetailsService;
+import com.hyderabad_home_theaters.services.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,9 @@ public class UserController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private UserProfileService userProfileService;
 
 
 
@@ -76,6 +81,23 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserDTO>> getUserById(@PathVariable Long userId){
         ApiResponse<UserDTO>  response = new ApiResponse<>();
         UserDTO userDTOs = userDetailsService.getUserById(userId);
+        if (userDTOs != null){
+            response.setStatus(200);
+            response.setMessage("Fetch User By Id Data Successfully");
+            response.setData(userDTOs);
+            return  new ResponseEntity<>(response, HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed To Fetch User By Id Data");
+            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @GetMapping("/getUserByFirstName/{firstName}")
+    public ResponseEntity<ApiResponse<ProfileDTO>> getUserByFirstName(@PathVariable String firstName){
+        ApiResponse<ProfileDTO>  response = new ApiResponse<>();
+        ProfileDTO userDTOs = userProfileService.getUserByFirstName(firstName);
         if (userDTOs != null){
             response.setStatus(200);
             response.setMessage("Fetch User By Id Data Successfully");

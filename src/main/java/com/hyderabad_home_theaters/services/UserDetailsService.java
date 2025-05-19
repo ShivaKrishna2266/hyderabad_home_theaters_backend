@@ -119,30 +119,39 @@ public class UserDetailsService {
     }
 
     public ProfileDTO getProfileUsername(String username) {
-        UserProfile userProfile = userProfileRepository.findByUsername(username);
-        if (userProfile == null) {
-            throw new RuntimeException("UserProfile not found for username: " + username);
-        }
+        Optional<UserProfile> optionalUserProfile = userProfileRepository.findByUsername(username);
+        UserProfile userProfile = optionalUserProfile.orElseThrow(
+                () -> new RuntimeException("UserProfile not found for username: " + username)
+        );
 
         ProfileDTO profileDTO = new ProfileDTO();
         profileDTO.setUsername(userProfile.getUsername());
-        profileDTO.setFullName(userProfile.getUsername()); // or set a real full name field
+        profileDTO.setFullName(userProfile.getUsername()); // Update with real logic if needed
         profileDTO.setEmail(userProfile.getEmail());
         profileDTO.setMobileNumber(userProfile.getMobileNumber());
 
-        List<Address> addressList = addressRepository.findByCustomerId(userProfile.getProfileId());
+        // ✅ Fetch addresses using the mapped relation
+        List<Address> addressList = addressRepository.findByUserProfile(userProfile);
+
         if (addressList != null && !addressList.isEmpty()) {
-            String combinedAddresses = addressList.stream()
-                    .map(Address::getAddressLine1)
-                    .filter(Objects::nonNull)
-                    .reduce((a, b) -> a + ", " + b)
-                    .orElse("N/A");
-            profileDTO.setAddressLine1(combinedAddresses);
+            Address address = addressList.get(0); // Just using the first address for demo
+            profileDTO.setAddressLine1(address.getAddressLine1());
+            profileDTO.setAddressLine2(address.getAddressLine2());
+            profileDTO.setLandmark(address.getLandmark());
+            profileDTO.setArea(address.getArea());
+            profileDTO.setCity(address.getCity());
+            profileDTO.setPostCode(address.getPinCode());
+            profileDTO.setState(address.getState());
+            profileDTO.setCountry(address.getCountry());
+            profileDTO.setRegion(address.getRegion());
         } else {
             profileDTO.setAddressLine1("N/A");
         }
+
         return profileDTO;
     }
+
+
     public User findOne(String username) {
         return userDao.findByUsername(username);
     }
