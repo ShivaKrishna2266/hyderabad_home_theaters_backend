@@ -1,6 +1,7 @@
 package com.hyderabad_home_theaters.services.impl;
 
 import com.hyderabad_home_theaters.DTOs.ProfileDTO;
+import com.hyderabad_home_theaters.DTOs.payment.OrderRequest;
 import com.hyderabad_home_theaters.entity.Address;
 import com.hyderabad_home_theaters.entity.Customer;
 import com.hyderabad_home_theaters.entity.UserProfile;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserProfileServiceImpl implements UserProfileService {
@@ -102,45 +104,77 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         return profileDTO;
     }
-
     @Override
-    public ProfileDTO updateProfile(String email, ProfileDTO profileDTO) {
-        Customer customer = customerRepository.findByEmail(email);
+    public void updateProfile(OrderRequest orderRequest) {
+        String username = orderRequest.getCustomerName();
+
+        if (username == null || username.trim().isEmpty()) {
+            System.out.println("Username is missing in OrderRequest");
+            return;
+        }
+
+        // Step 1: Find or Create Customer
+        Customer customer = customerRepository.findByUsername(username).orElse(null);
+
         if (customer == null) {
-
-            return null;
+            customer = new Customer();
+            customer.setUsername(username);
+            customer.setFirstName(orderRequest.getProfile().getFirstName());
+            customer.setSurname(orderRequest.getProfile().getSurname());
+            customer.setFullName(orderRequest.getProfile().getFirstName() + " " + orderRequest.getProfile().getSurname());
+            customer.setEmail(orderRequest.getEmail());
+            customer.setMobileNumber(orderRequest.getMobileNumber());
+            customer.setCreatedBy("SYSTEM");
+            customer.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+            customer = customerRepository.save(customer);
         }
 
-        customer.setFirstName(profileDTO.getFirstName());
-        customer.setSurname(profileDTO.getSurname());
-        customer.setFullName(profileDTO.getFirstName()+ " "+profileDTO.getSurname());
-        customer.setEmail(profileDTO.getEmail());
-        customer.setMobileNumber(profileDTO.getMobileNumber());
-        customer.setModifiedBy("SYSTEM");
-        customer.setModifiedDate(new Timestamp(new Date().getTime()));
-        customer = customerRepository.save(customer);
-        List<Address> addresses = addressRepository.findByCustomerId(customer.getCustomerId());
-        if (!addresses.isEmpty()) {
-            Address address = addresses.get(0);
-            address.setCustomerId(customer.getCustomerId());
-            address.setAddressLine1(profileDTO.getAddressLine1());
-            address.setAddressLine2(profileDTO.getAddressLine2());
-            address.setLandmark(profileDTO.getLandmark());
-            address.setArea(profileDTO.getArea());
-            address.setCity(profileDTO.getCity());
-            address.setState(profileDTO.getState());
-            address.setCountry(profileDTO.getCountry());
-            address.setRegion(profileDTO.getRegion());
-            address.setPinCode(profileDTO.getPostCode());
+        // Step 2: Find or Create UserProfile
+        UserProfile userProfile = userProfileRepository.findByUsername(username).orElse(null);
+
+        if (userProfile == null) {
+            userProfile = new UserProfile();
+            userProfile.setUsername(username);
+            userProfile.setEmail(orderRequest.getEmail());
+            userProfile.setMobileNumber(orderRequest.getMobileNumber());
+            userProfile.setCustomer(customer);
+            userProfile.setCreatedBy("SYSTEM");
+            userProfile.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+            userProfile = userProfileRepository.save(userProfile);
+        }
+
+        // Step 3: Update or Create Address
+        List<Address> existingAddresses = addressRepository.findByUserProfile(userProfile);
+
+        Address address;
+        if (!existingAddresses.isEmpty()) {
+            address = existingAddresses.get(0); // Get the first existing address
             address.setModifiedBy("SYSTEM");
-            address.setModifiedDate(new Timestamp(new Date().getTime()));
-            addressRepository.save(address);
+            address.setModifiedDate(new Timestamp(System.currentTimeMillis()));
         } else {
-            return null;
+            address = new Address();
+            address.setCustomerId(customer.getCustomerId());
+            address.setUserProfile(userProfile);
+            address.setCreatedBy("SYSTEM");
+            address.setCreatedDate(new Timestamp(System.currentTimeMillis()));
         }
 
-        return profileDTO;
+        // Set (or update) fields from profile
+        address.setAddressLine1(orderRequest.getProfile().getAddressLine1());
+        address.setAddressLine2(orderRequest.getProfile().getAddressLine2());
+        address.setLandmark(orderRequest.getProfile().getLandmark());
+        address.setArea(orderRequest.getProfile().getArea());
+        address.setCity(orderRequest.getProfile().getCity());
+        address.setState(orderRequest.getProfile().getState());
+        address.setCountry(orderRequest.getProfile().getCountry());
+        address.setRegion(orderRequest.getProfile().getRegion());
+        address.setPinCode(orderRequest.getProfile().getPostCode());
+
+        addressRepository.save(address);
     }
+
+
+
 
 
 

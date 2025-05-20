@@ -1,11 +1,13 @@
 package com.hyderabad_home_theaters.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hyderabad_home_theaters.DTOs.ContactUsDTO;
 import com.hyderabad_home_theaters.DTOs.OrderDTO;
 import com.hyderabad_home_theaters.DTOs.ProfileDTO;
 import com.hyderabad_home_theaters.DTOs.UserDTO;
 import com.hyderabad_home_theaters.DTOs.payment.OrderRequest;
 import com.hyderabad_home_theaters.entity.Address;
+import com.hyderabad_home_theaters.entity.ContactUs;
 import com.hyderabad_home_theaters.entity.Customer;
 import com.hyderabad_home_theaters.entity.Orders;
 import com.hyderabad_home_theaters.entity.User;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -126,22 +129,37 @@ public class OrderService {
         order.setEmail(orderRequest.getEmail());
         order.setMobileNumber(orderRequest.getMobileNumber());
         order.setCustomerName(username);
+
         return orderRepository.save(order);
     }
 
 
     @Transactional
-    public String validateAndUpdateOrder(final String razorpayOrderId, final String razorpayPaymentId, final String razorpaySignature, final String secret) {
+    public String validateAndUpdateOrder(final String razorpayOrderId, final String razorpayPaymentId,
+                                         final String razorpaySignature, final String secret) {
         String errorMsg = null;
+
         try {
             Orders order = orderRepository.findByRazorpayOrderId(razorpayOrderId);
-            // Verify if the razorpay signature matches the generated one to
-            // confirm the authenticity of the details returned
-            String generatedSignature = Signature.calculateRFC2104HMAC(order.getRazorpayOrderId() + "|" + razorpayPaymentId, secret);
+
+            if (order == null) {
+                return "Order not found for Razorpay Order ID: " + razorpayOrderId;
+            }
+
+            // Verify signature
+            String generatedSignature = Signature.calculateRFC2104HMAC(
+                    razorpayOrderId + "|" + razorpayPaymentId,
+                    secret
+            );
+
             if (generatedSignature.equals(razorpaySignature)) {
                 order.setRazorpayOrderId(razorpayOrderId);
                 order.setRazorpayPaymentId(razorpayPaymentId);
                 order.setRazorpaySignature(razorpaySignature);
+                order.setOrderStatus("SUCCESS"); // Optional but recommended
+                order.setUpdatedBy("razorpay");
+                order.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+
                 orderRepository.save(order);
             } else {
                 errorMsg = "Payment validation failed: Signature doesn't match";
@@ -150,16 +168,31 @@ public class OrderService {
             log.error("Payment validation failed", e);
             errorMsg = e.getMessage();
         }
+
         return errorMsg;
     }
 
     @Transactional
     public List<OrderDTO> getAllOrders() {
-        return orderRepository.findAll().stream()
-                .map(OrderMapper::convertToDTO)
-                .collect(Collectors.toList());
-    }
 
+        List<OrderDTO> orderDTOList = new ArrayList<>();
+        List<Orders> ordersList = orderRepository.findAll();
+        for (Orders orders : ordersList) {
+            OrderDTO orderDTO = new OrderDTO();
+            orderDTO.setOrderId(orders.getOrderId());
+            orderDTO.setUsername(orders.getCustomerName());
+            orderDTO.setEmail(orders.getEmail());
+            orderDTO.setMobileNumber(orders.getMobileNumber());
+            orderDTO.setRazorpayPaymentId(orders.getRazorpayPaymentId());
+            orderDTO.setRazorpayOrderId(orders.getRazorpayOrderId());
+            orderDTO.setRazorpaySignature(orders.getRazorpaySignature());
+            orderDTO.setAmount(orders.getAmount());
+            orderDTO.setProfile(orders.getProfile());
+            orderDTO.setOrderStatus(orders.getOrderStatus());
+            orderDTOList.add(orderDTO);
+        }
+        return orderDTOList;
+    }
 
 
     @Transactional
