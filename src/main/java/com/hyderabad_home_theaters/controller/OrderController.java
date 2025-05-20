@@ -1,12 +1,15 @@
 package com.hyderabad_home_theaters.controller;
 
 import com.hyderabad_home_theaters.DTOs.ApiResponse1;
+import com.hyderabad_home_theaters.DTOs.BrandDTO;
 import com.hyderabad_home_theaters.DTOs.OrderDTO;
 import com.hyderabad_home_theaters.DTOs.payment.OrderRequest;
 import com.hyderabad_home_theaters.DTOs.payment.OrderResponse;
 import com.hyderabad_home_theaters.DTOs.payment.PaymentResponse;
 import com.hyderabad_home_theaters.config.RazorPayClientConfig;
+import com.hyderabad_home_theaters.entity.ApiResponse;
 import com.hyderabad_home_theaters.services.OrderService;
+import com.hyderabad_home_theaters.services.UserProfileService;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
@@ -42,6 +45,9 @@ public class OrderController {
     private OrderService orderService;
 
     @Autowired
+    private UserProfileService userProfileService;
+
+    @Autowired
     public OrderController(RazorPayClientConfig razorpayClientConfig) throws RazorpayException {
         this.razorPayClientConfig = razorpayClientConfig;
         this.client = new RazorpayClient(razorpayClientConfig.getKey(), razorpayClientConfig.getSecret());
@@ -52,7 +58,7 @@ public class OrderController {
         OrderResponse razorPay = null;
         try {
 
-//            orderService.updateUserProfile(orderRequest);
+            userProfileService.updateProfile(orderRequest);
             String amountInPaise = convertRupeeToPaise(orderRequest.getAmount());
             Order order = createRazorPayOrder(amountInPaise, orderRequest);
             razorPay = getOrderResponse((String) order.get("id"), amountInPaise);
@@ -67,13 +73,29 @@ public class OrderController {
         return ResponseEntity.ok(razorPay);
     }
 
-    @PutMapping()
+
+    @PutMapping
     public ResponseEntity<?> updateOrder(@RequestBody PaymentResponse paymentResponse) {
-        String errorMsg = orderService.validateAndUpdateOrder(paymentResponse.getRazorpayOrderId(), paymentResponse.getRazorpayPaymentId(), paymentResponse.getRazorpaySignature(),
-                razorPayClientConfig.getSecret());
+        log.info("Received updateOrder request with orderId: {}, paymentId: {}, signature: {}",
+                paymentResponse.getRazorpayOrderId(),
+                paymentResponse.getRazorpayPaymentId(),
+                paymentResponse.getRazorpaySignature());
+
+        String errorMsg = orderService.validateAndUpdateOrder(
+                paymentResponse.getRazorpayOrderId(),
+                paymentResponse.getRazorpayPaymentId(),
+                paymentResponse.getRazorpaySignature(),
+                razorPayClientConfig.getSecret()
+        );
+
         if (errorMsg != null) {
-            return new ResponseEntity<>(new ApiResponse1(false, errorMsg), HttpStatus.BAD_REQUEST);
+            log.warn("Payment update failed: {}", errorMsg);
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse1(false, errorMsg));
         }
+
+        log.info("Payment update successful for Razorpay Order ID: {}", paymentResponse.getRazorpayOrderId());
         return ResponseEntity.ok(new ApiResponse1(true, paymentResponse.getRazorpayPaymentId()));
     }
 
@@ -105,8 +127,20 @@ public class OrderController {
     }
 
     @GetMapping()
-    public List<OrderDTO> getAllOrders() {
-        return orderService.getAllOrders();
+    public ResponseEntity<ApiResponse<List<OrderDTO>>> getAllOrders() {
+        ApiResponse<List<OrderDTO>> response = new ApiResponse<>();
+        List<OrderDTO> orderDTOS = orderService.getAllOrders();
+
+        if (orderDTOS != null) {
+            response.setStatus(200);
+            response.setMessage("Fetched all Orders records successfully");
+            response.setData(orderDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to fetch Orders Data");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/{orderStatus}")

@@ -11,7 +11,9 @@ import java.util.List;
 public interface OrderRepository extends JpaRepository<Orders, Long> {
 
 
-    Orders findByRazorpayOrderId(String orderId);
+//    Orders findByRazorpayOrderId(String orderId);
+    Orders findByRazorpayOrderId(String razorpayOrderId);
+
 
     List<Orders> findOrdersByUserId (Long userId);
 }
