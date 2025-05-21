@@ -93,15 +93,12 @@ public class CategoryServiceImpl implements CategoryService {
             category.setUpdatedBy("System");
             category.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
 
-
             if (categoryDTO.getBrandId() != null) {
                 Brand brand = brandRepository.findById(categoryDTO.getBrandId()) .orElseThrow(() -> new RuntimeException("Brand not found"));
                 category.setBrand(brand);
             } else {
                 System.out.println("Brand ID is null in categoryDTO");
             }
-
-
 
             Category updatedCategory = categoryRepository.save(category);
             return CategoryMapper.convertToDTO(updatedCategory);

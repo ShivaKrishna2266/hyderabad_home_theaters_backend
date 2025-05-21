@@ -61,15 +61,19 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserDTO request) {
         Map<String, String> response = new HashMap<>();
         try {
-            // Register user and send OTP
             userDetailsService.registerUser(request);
             response.put("message", "OTP sent. Please verify your OTP to complete registration.");
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
+            // This handles errors like "Username already exists" sent as RuntimeException
             response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        } catch (Exception e) {
+            response.put("error", "Internal server error");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
 
 
     @PostMapping("/authenticate")

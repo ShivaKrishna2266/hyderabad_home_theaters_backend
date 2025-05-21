@@ -8,13 +8,13 @@ public interface ReviewServices {
 
     List<ReviewDTO> getAllReviews();
 
-    ReviewDTO getReviewById(Long id);
+    ReviewDTO getReviewById(Long reviewId);
 
     ReviewDTO createReview(ReviewDTO reviewDTO);
 
-    ReviewDTO updateReview(Long id, ReviewDTO reviewDTO);
+    ReviewDTO updateReview(Long reviewId, ReviewDTO reviewDTO);
 
-    void deleteReviewById(Long id);
+    void deleteReviewById(Long reviewId);
 
     List<ReviewDTO> getReviewByProductId(Long productId);
 }

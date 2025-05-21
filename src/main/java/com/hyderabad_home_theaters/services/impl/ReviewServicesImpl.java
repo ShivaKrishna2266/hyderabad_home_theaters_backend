@@ -45,8 +45,8 @@ public class ReviewServicesImpl implements ReviewServices {
     }
 
     @Override
-    public ReviewDTO getReviewById(Long id) {
-        return reviewRepository.findById(id)
+    public ReviewDTO getReviewById(Long reviewId) {
+        return reviewRepository.findById(reviewId)
                 .map(reviewMapper::toDto)
                 .orElse(null);
     }
@@ -73,8 +73,8 @@ public class ReviewServicesImpl implements ReviewServices {
     }
 
     @Override
-    public ReviewDTO updateReview(Long id, ReviewDTO reviewDTO) {
-        Optional<Review> optionalReview = reviewRepository.findById(id);
+    public ReviewDTO updateReview(Long reviewId, ReviewDTO reviewDTO) {
+        Optional<Review> optionalReview = reviewRepository.findById(reviewId);
         if (optionalReview.isPresent()) {
             Review review = optionalReview.get();
             review.setName(reviewDTO.getName());
@@ -93,11 +93,11 @@ public class ReviewServicesImpl implements ReviewServices {
     }
 
     @Override
-    public void deleteReviewById(Long id) {
-        if (reviewRepository.existsById(id)) {
-            reviewRepository.deleteById(id);
+    public void deleteReviewById(Long reviewId) {
+        if (reviewRepository.existsById(reviewId)) {
+            reviewRepository.deleteById(reviewId);
         } else {
-            throw new RuntimeException("Review not found with ID: " + id);
+            throw new RuntimeException("Review not found with ID: " + reviewId);
         }
     }
 
