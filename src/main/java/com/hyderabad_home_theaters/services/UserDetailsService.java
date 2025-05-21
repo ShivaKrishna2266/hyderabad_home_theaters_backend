@@ -55,6 +55,11 @@ public class UserDetailsService {
 
     // ✅ Send OTP only
     public String registerUser(UserDTO request) {
+        // ✅ Check if username & mobile number already exists
+        if (userRepository.existsByUsernameAndPhoneNumber(request.getUsername(), request.getPhoneNumber())) {
+            throw new RuntimeException("Username and phoneNumber already registered");
+        }
+
         WatiTemplatesResponse response = watiService.sendWatiOTP(request.getPhoneNumber());
 
         OtpVerification otpVerification = new OtpVerification();

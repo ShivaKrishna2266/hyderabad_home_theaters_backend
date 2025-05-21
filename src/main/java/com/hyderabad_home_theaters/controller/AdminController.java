@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyderabad_home_theaters.DTOs.BrandDTO;
 import com.hyderabad_home_theaters.DTOs.CategoryDTO;
+import com.hyderabad_home_theaters.DTOs.HeaderDTO;
 import com.hyderabad_home_theaters.DTOs.ProductDTO;
 import com.hyderabad_home_theaters.DTOs.QuestionsDTO;
 import com.hyderabad_home_theaters.DTOs.ReviewDTO;
@@ -15,6 +16,7 @@ import com.hyderabad_home_theaters.entity.MessageTemplate;
 import com.hyderabad_home_theaters.exception.ResourceNotFoundException;
 import com.hyderabad_home_theaters.services.BrandService;
 import com.hyderabad_home_theaters.services.CategoryService;
+import com.hyderabad_home_theaters.services.HeaderServices;
 import com.hyderabad_home_theaters.services.ProductService;
 import com.hyderabad_home_theaters.services.QuestionsServices;
 import com.hyderabad_home_theaters.services.ReviewServices;
@@ -77,6 +79,9 @@ public class AdminController {
 
     @Autowired
     private QuestionsServices questionsServices;
+
+    @Autowired
+    private HeaderServices headerServices;
 
 
     @Value("${file.upload.brand.dir}")
@@ -726,6 +731,23 @@ public class AdminController {
         }
     }
 
+    @PutMapping("/updateReviewById/{reviewId}")
+    public ResponseEntity<ApiResponse<ReviewDTO>> updateReview(@PathVariable Long reviewId,
+                                                                    @RequestBody ReviewDTO reviewDTO) {
+        ApiResponse<ReviewDTO> response = new ApiResponse<>();
+        ReviewDTO updateReview = reviewServices.updateReview(reviewId, reviewDTO);
+        if (updateReview != null) {
+            response.setStatus(200);
+            response.setMessage("Review updated successfully!");
+            response.setData(updateReview);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed to update Review");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     //========================QUESTIONS==========================//
 
@@ -798,6 +820,77 @@ public class AdminController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    //========================= HEADER ======================================//
+
+
+    @GetMapping("/getAllHeaders")
+    public ResponseEntity<ApiResponse<List<HeaderDTO>>> getAllHeaders(){
+        ApiResponse<List<HeaderDTO>> response = new ApiResponse<>();
+        List<HeaderDTO> headerDTOS = headerServices.getAllHeaders();
+        if (headerDTOS != null){
+            response.setStatus(200);
+            response.setMessage("Fetch All Headers Successfully");
+            response.setData(headerDTOS);
+            return  new ResponseEntity<>(response,HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed to fetch Get All Headers");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/getHeaderById/{headerId}")
+    public ResponseEntity<ApiResponse<HeaderDTO>> getHeaderById(@PathVariable Long headerId){
+        ApiResponse<HeaderDTO>  response = new ApiResponse<>();
+        HeaderDTO headerDTO = headerServices.getHeaderById(headerId);
+        if (headerDTO != null){
+            response.setStatus(200);
+            response.setMessage("Fetch Header By Id Data Successfully");
+            response.setData(headerDTO);
+            return  new ResponseEntity<>(response, HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed To Fetch Header By Id Data");
+            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/createHeader")
+    public ResponseEntity<ApiResponse<HeaderDTO>> createHeader( @RequestBody HeaderDTO headerDTO) {
+
+        ApiResponse<HeaderDTO> response = new ApiResponse<>();
+            HeaderDTO headerDTO1 = headerServices.createHeader(headerDTO);
+            if (headerDTO1 != null){
+                response.setStatus(200);
+                response.setMessage("Create header Successfully");
+                response.setData(headerDTO1);
+                return  new ResponseEntity<>(response, HttpStatus.OK);
+            }else {
+                response.setStatus(500);
+                response.setMessage("Failed to create Header");
+                return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+    }
+
+    @PutMapping("/updateHeader/{headerId}")
+    public ResponseEntity<ApiResponse<HeaderDTO>> updateHeader(@RequestBody HeaderDTO headerDTO,
+                                                                 @PathVariable Long headerId){
+        ApiResponse<HeaderDTO> response = new ApiResponse<>();
+        HeaderDTO headerDTO1 = headerServices.updateHeader(headerId,headerDTO);
+        if (headerDTO1 != null){
+            response.setStatus(200);
+            response.setMessage("Update Header Successfully");
+            response.setData(headerDTO1);
+            return  new ResponseEntity<>(response, HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed to Update Header");
+            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
 
 }
