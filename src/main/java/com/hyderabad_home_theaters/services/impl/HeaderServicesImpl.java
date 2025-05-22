@@ -1,17 +1,8 @@
 package com.hyderabad_home_theaters.services.impl;
 
-import com.hyderabad_home_theaters.DTOs.BrandDTO;
-import com.hyderabad_home_theaters.DTOs.ContactUsDTO;
 import com.hyderabad_home_theaters.DTOs.HeaderDTO;
-import com.hyderabad_home_theaters.entity.Brand;
-import com.hyderabad_home_theaters.entity.Category;
-import com.hyderabad_home_theaters.entity.ContactUs;
-import com.hyderabad_home_theaters.entity.GeneralSettings;
 import com.hyderabad_home_theaters.entity.Header;
 import com.hyderabad_home_theaters.exception.ApplicationBusinessException;
-import com.hyderabad_home_theaters.mapper.BrandMapper;
-import com.hyderabad_home_theaters.mapper.CategoryMapper;
-import com.hyderabad_home_theaters.mapper.GeneralSettingsMapper;
 import com.hyderabad_home_theaters.mapper.HeaderMapper;
 import com.hyderabad_home_theaters.repository.HeaderRepository;
 import com.hyderabad_home_theaters.services.HeaderServices;

@@ -1,12 +1,11 @@
 package com.hyderabad_home_theaters.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyderabad_home_theaters.DTOs.BrandDTO;
 import com.hyderabad_home_theaters.DTOs.CategoryDTO;
 import com.hyderabad_home_theaters.DTOs.HeaderDTO;
 import com.hyderabad_home_theaters.DTOs.ProductDTO;
+import com.hyderabad_home_theaters.DTOs.ProjectsDTO;
 import com.hyderabad_home_theaters.DTOs.QuestionsDTO;
 import com.hyderabad_home_theaters.DTOs.ReviewDTO;
 import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
@@ -18,6 +17,7 @@ import com.hyderabad_home_theaters.services.BrandService;
 import com.hyderabad_home_theaters.services.CategoryService;
 import com.hyderabad_home_theaters.services.HeaderServices;
 import com.hyderabad_home_theaters.services.ProductService;
+import com.hyderabad_home_theaters.services.ProjectsServices;
 import com.hyderabad_home_theaters.services.QuestionsServices;
 import com.hyderabad_home_theaters.services.ReviewServices;
 import com.hyderabad_home_theaters.services.SubCategoryService;
@@ -27,7 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,12 +35,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -82,6 +79,9 @@ public class AdminController {
 
     @Autowired
     private HeaderServices headerServices;
+
+    @Autowired
+    private ProjectsServices projectsServices;
 
 
     @Value("${file.upload.brand.dir}")
@@ -887,6 +887,75 @@ public class AdminController {
         }else {
             response.setStatus(500);
             response.setMessage("Failed to Update Header");
+            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+//==========================PROJECTS======================================//
+
+
+    @GetMapping("/getAllProjects")
+    public ResponseEntity<ApiResponse<List<ProjectsDTO>>> getAllProjects(){
+        ApiResponse<List<ProjectsDTO>> response = new ApiResponse<>();
+        List<ProjectsDTO> projectsDTOS = projectsServices.getAllProjects();
+        if (projectsDTOS != null){
+            response.setStatus(200);
+            response.setMessage("Fetch All Projects Successfully");
+            response.setData(projectsDTOS);
+            return  new ResponseEntity<>(response,HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed to fetch Get All Projects");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/getProjectById/{projectId}")
+    public ResponseEntity<ApiResponse<ProjectsDTO>> getProjectById(@PathVariable Long projectId){
+        ApiResponse<ProjectsDTO>  response = new ApiResponse<>();
+        ProjectsDTO projectsDTO = projectsServices.getProjectById(projectId);
+        if (projectsDTO != null){
+            response.setStatus(200);
+            response.setMessage("Fetch Project By Id Data Successfully");
+            response.setData(projectsDTO);
+            return  new ResponseEntity<>(response, HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed To Fetch Project By Id Data");
+            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("/createProject")
+    public ResponseEntity<ApiResponse<ProjectsDTO>> createProject( @RequestBody ProjectsDTO projectsDTO) {
+
+        ApiResponse<ProjectsDTO> response = new ApiResponse<>();
+        ProjectsDTO projectsDTO1 = projectsServices.createProject(projectsDTO);
+        if (projectsDTO1 != null){
+            response.setStatus(200);
+            response.setMessage("Create Project Successfully");
+            response.setData(projectsDTO1);
+            return  new ResponseEntity<>(response, HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed to create Project");
+            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/updateProject/{projectId}")
+    public ResponseEntity<ApiResponse<ProjectsDTO>> updateProject(@RequestBody ProjectsDTO projectsDTO,
+                                                               @PathVariable Long projectId){
+        ApiResponse<ProjectsDTO> response = new ApiResponse<>();
+        ProjectsDTO projectsDTO1 = projectsServices.updateProject(projectId,projectsDTO);
+        if (projectsDTO1 != null){
+            response.setStatus(200);
+            response.setMessage("Update Project Successfully");
+            response.setData(projectsDTO1);
+            return  new ResponseEntity<>(response, HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed to Update Project");
             return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
