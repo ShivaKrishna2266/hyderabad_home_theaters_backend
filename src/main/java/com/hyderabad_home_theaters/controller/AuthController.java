@@ -2,13 +2,10 @@ package com.hyderabad_home_theaters.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyderabad_home_theaters.DTOs.LoginDTO;
-import com.hyderabad_home_theaters.DTOs.OtpVerificationDTO;
 import com.hyderabad_home_theaters.DTOs.ProfileDTO;
 import com.hyderabad_home_theaters.DTOs.UserDTO;
-import com.hyderabad_home_theaters.DTOs.WatiTemplateRequestDTO;
 import com.hyderabad_home_theaters.config.CustomUserDetailsService;
 import com.hyderabad_home_theaters.config.JwtUtil;
-import com.hyderabad_home_theaters.entity.Role;
 import com.hyderabad_home_theaters.entity.User;
 import com.hyderabad_home_theaters.entity.WatiTemplatesResponse;
 import com.hyderabad_home_theaters.services.UserDetailsService;
@@ -23,10 +20,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

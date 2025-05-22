@@ -6,6 +6,7 @@ import com.hyderabad_home_theaters.DTOs.CategoryDTO;
 import com.hyderabad_home_theaters.DTOs.ContactUsDTO;
 import com.hyderabad_home_theaters.DTOs.CountryCodeDTO;
 import com.hyderabad_home_theaters.DTOs.GeneralSettingsDTO;
+import com.hyderabad_home_theaters.DTOs.HeaderDTO;
 import com.hyderabad_home_theaters.DTOs.OtpVerificationDTO;
 import com.hyderabad_home_theaters.DTOs.ProductDTO;
 import com.hyderabad_home_theaters.DTOs.ProfileDTO;
@@ -20,6 +21,7 @@ import com.hyderabad_home_theaters.services.CategoryService;
 import com.hyderabad_home_theaters.services.ContactUsService;
 import com.hyderabad_home_theaters.services.CountryCodeService;
 import com.hyderabad_home_theaters.services.GeneralSettingService;
+import com.hyderabad_home_theaters.services.HeaderServices;
 import com.hyderabad_home_theaters.services.OtpVerificationServices;
 import com.hyderabad_home_theaters.services.ProductService;
 import com.hyderabad_home_theaters.services.QuestionsServices;
@@ -92,6 +94,9 @@ public class DataLoaderController {
 
    @Autowired
    private UserProfileService userProfileService;
+
+   @Autowired
+   private HeaderServices headerServices;
 
 
     @Value("${file.upload.review.dir}")
@@ -850,6 +855,23 @@ public class DataLoaderController {
         } catch (Exception e) {
             response.setStatus(500);
             response.setMessage("Failed to ProfileDTO a Enquiry!");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @GetMapping("/getAllHeaders")
+    public ResponseEntity<ApiResponse<List<HeaderDTO>>> getAllHeaders(){
+        ApiResponse<List<HeaderDTO>> response = new ApiResponse<>();
+        List<HeaderDTO> headerDTOS = headerServices.getAllHeaders();
+        if (headerDTOS != null){
+            response.setStatus(200);
+            response.setMessage("Fetch All Headers Successfully");
+            response.setData(headerDTOS);
+            return  new ResponseEntity<>(response,HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed to fetch Get All Headers");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
