@@ -1,6 +1,8 @@
 package com.hyderabad_home_theaters.entity;
 
+import com.hyderabad_home_theaters.util.StringListConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,6 +14,7 @@ import lombok.NoArgsConstructor;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -34,8 +37,9 @@ public class Projects {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "images")
-    private String images;
+    @Column(name = "images", columnDefinition = "TEXT")
+    @Convert(converter = StringListConverter.class)
+    private List<String> images;
 
     @Column(name = "start_date")
     private Date startDate;

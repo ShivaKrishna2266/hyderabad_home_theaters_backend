@@ -4,6 +4,7 @@ import com.hyderabad_home_theaters.DTOs.CategoryDTO;
 import com.hyderabad_home_theaters.entity.Brand;
 import com.hyderabad_home_theaters.entity.Category;
 import com.hyderabad_home_theaters.entity.SubCategory;
+import com.hyderabad_home_theaters.exception.ResourceNotFoundException;
 import com.hyderabad_home_theaters.mapper.CategoryMapper;
 import com.hyderabad_home_theaters.repository.BrandRepository;
 import com.hyderabad_home_theaters.repository.CategoryRepository;
@@ -107,6 +108,10 @@ public class CategoryServiceImpl implements CategoryService {
     }
     @Override
     public void deleteCategoryById(Long categoryId) {
+        if (!categoryRepository.existsById(categoryId)) {
+            throw new ResourceNotFoundException("Category with ID " + categoryId + " not found");
+        }
+        categoryRepository.deleteById(categoryId);
 
     }
 }

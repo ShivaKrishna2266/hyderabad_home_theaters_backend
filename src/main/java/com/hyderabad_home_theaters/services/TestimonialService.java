@@ -15,7 +15,7 @@ public interface TestimonialService {
 
     TestimonialDTO updateTestimonial(Long testimonialId, TestimonialDTO testimonialDTO);
 
-    TestimonialDTO deleteTestimonialById(Long testimonialId) throws ApplicationBusinessException;
+    void deleteTestimonialById(Long testimonialId);
 
     TestimonialDTO updateTestimonialStatus (Long testimonialId, String status  );
 }

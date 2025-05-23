@@ -3,6 +3,7 @@ package com.hyderabad_home_theaters.services.impl;
 import com.hyderabad_home_theaters.DTOs.ContactUsDTO;
 import com.hyderabad_home_theaters.entity.ContactUs;
 import com.hyderabad_home_theaters.exception.ApplicationBusinessException;
+import com.hyderabad_home_theaters.exception.ResourceNotFoundException;
 import com.hyderabad_home_theaters.mapper.ContactUsMapper;
 import com.hyderabad_home_theaters.repository.ContactUsRepository;
 import com.hyderabad_home_theaters.services.ContactUsService;
@@ -46,7 +47,10 @@ public class ContactUsServiceImpl implements ContactUsService {
 
     @Override
     public void deleteContactUs(Long contactUsId) {
-
+        if (!contactUsRepository.existsById(contactUsId)) {
+            throw new ResourceNotFoundException("ContactUs with ID " + contactUsId + " not found");
+        }
+        contactUsRepository.deleteById(contactUsId);
     }
 
     @Override

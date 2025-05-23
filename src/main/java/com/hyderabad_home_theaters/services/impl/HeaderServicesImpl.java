@@ -3,6 +3,7 @@ package com.hyderabad_home_theaters.services.impl;
 import com.hyderabad_home_theaters.DTOs.HeaderDTO;
 import com.hyderabad_home_theaters.entity.Header;
 import com.hyderabad_home_theaters.exception.ApplicationBusinessException;
+import com.hyderabad_home_theaters.exception.ResourceNotFoundException;
 import com.hyderabad_home_theaters.mapper.HeaderMapper;
 import com.hyderabad_home_theaters.repository.HeaderRepository;
 import com.hyderabad_home_theaters.services.HeaderServices;
@@ -78,6 +79,9 @@ public class HeaderServicesImpl implements HeaderServices {
 
     @Override
     public void deleteHeaderById(Long headerId) {
-
+        if (!headerRepository.existsById(headerId)) {
+            throw new ResourceNotFoundException("Header with ID " + headerId + " not found");
+        }
+        headerRepository.deleteById(headerId);
     }
 }

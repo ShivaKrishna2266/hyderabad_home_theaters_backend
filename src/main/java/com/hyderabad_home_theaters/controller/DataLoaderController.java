@@ -10,6 +10,7 @@ import com.hyderabad_home_theaters.DTOs.HeaderDTO;
 import com.hyderabad_home_theaters.DTOs.OtpVerificationDTO;
 import com.hyderabad_home_theaters.DTOs.ProductDTO;
 import com.hyderabad_home_theaters.DTOs.ProfileDTO;
+import com.hyderabad_home_theaters.DTOs.ProjectsDTO;
 import com.hyderabad_home_theaters.DTOs.QuestionsDTO;
 import com.hyderabad_home_theaters.DTOs.ReviewDTO;
 import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
@@ -24,6 +25,7 @@ import com.hyderabad_home_theaters.services.GeneralSettingService;
 import com.hyderabad_home_theaters.services.HeaderServices;
 import com.hyderabad_home_theaters.services.OtpVerificationServices;
 import com.hyderabad_home_theaters.services.ProductService;
+import com.hyderabad_home_theaters.services.ProjectsServices;
 import com.hyderabad_home_theaters.services.QuestionsServices;
 import com.hyderabad_home_theaters.services.ReviewServices;
 import com.hyderabad_home_theaters.services.SubCategoryService;
@@ -97,6 +99,9 @@ public class DataLoaderController {
 
    @Autowired
    private HeaderServices headerServices;
+
+   @Autowired
+   private ProjectsServices projectsServices;
 
 
     @Value("${file.upload.review.dir}")
@@ -872,6 +877,22 @@ public class DataLoaderController {
         }else {
             response.setStatus(500);
             response.setMessage("Failed to fetch Get All Headers");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/getAllProjects")
+    public ResponseEntity<ApiResponse<List<ProjectsDTO>>> getAllProjects(){
+        ApiResponse<List<ProjectsDTO>> response = new ApiResponse<>();
+        List<ProjectsDTO> projectsDTOS = projectsServices.getAllProjects();
+        if (projectsDTOS != null){
+            response.setStatus(200);
+            response.setMessage("Fetch All Projects Successfully");
+            response.setData(projectsDTOS);
+            return  new ResponseEntity<>(response,HttpStatus.OK);
+        }else {
+            response.setStatus(500);
+            response.setMessage("Failed to fetch Get All Projects");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
