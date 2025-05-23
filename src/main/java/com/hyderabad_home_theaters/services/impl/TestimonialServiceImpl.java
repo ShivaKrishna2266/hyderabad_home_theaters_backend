@@ -5,6 +5,7 @@ import com.hyderabad_home_theaters.constants.AppConstants;
 import com.hyderabad_home_theaters.entity.Testimonial;
 import com.hyderabad_home_theaters.entity.User;
 import com.hyderabad_home_theaters.exception.ApplicationBusinessException;
+import com.hyderabad_home_theaters.exception.ResourceNotFoundException;
 import com.hyderabad_home_theaters.mapper.TestimonialMapper;
 import com.hyderabad_home_theaters.repository.TestimonialRepository;
 import com.hyderabad_home_theaters.services.TestimonialService;
@@ -90,9 +91,14 @@ public class TestimonialServiceImpl implements TestimonialService {
     }
 
     @Override
-    public TestimonialDTO deleteTestimonialById(Long testimonialId) throws ApplicationBusinessException {
-        return null;
+    public void deleteTestimonialById(Long testimonialId) {
+        if (!testimonialRepository.existsById(testimonialId)) {
+            throw new ResourceNotFoundException("Testimonial with ID " + testimonialId + " not found");
+        }
+        testimonialRepository.deleteById(testimonialId);
     }
+
+
 
     @Override
     public TestimonialDTO updateTestimonialStatus(Long testimonialId, String status) {

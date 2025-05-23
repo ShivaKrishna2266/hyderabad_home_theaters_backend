@@ -5,6 +5,7 @@ import com.hyderabad_home_theaters.DTOs.BrandDTO;
 import com.hyderabad_home_theaters.entity.Brand;
 import com.hyderabad_home_theaters.entity.Category;
 import com.hyderabad_home_theaters.exception.ApplicationBusinessException;
+import com.hyderabad_home_theaters.exception.ResourceNotFoundException;
 import com.hyderabad_home_theaters.mapper.BrandMapper;
 import com.hyderabad_home_theaters.repository.BrandRepository;
 import com.hyderabad_home_theaters.repository.CategoryRepository;
@@ -104,7 +105,10 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     public void deleteBrandById(Long brandId) {
-
+        if (!brandRepository.existsById(brandId)) {
+            throw new ResourceNotFoundException("Brand with ID " + brandId + " not found");
+        }
+        brandRepository.deleteById(brandId);
     }
 
     @Override

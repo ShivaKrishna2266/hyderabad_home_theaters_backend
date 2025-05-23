@@ -44,6 +44,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -95,6 +96,12 @@ public class AdminController {
 
     @Value("${file.upload.testimonial.dir}")
     private String uploadTestimonialDir;
+
+
+    @Value("${file.upload.projects.dir}")
+    private String uploadProjectsDir;
+
+
 
     @GetMapping("/getAllBrands")
     private ResponseEntity<ApiResponse<List<BrandDTO>>> getAllBrands() {
@@ -306,8 +313,22 @@ public class AdminController {
         }
     }
 
-
-
+    @DeleteMapping("/deleteCategory/{categoryId}")
+    public ResponseEntity<ApiResponse<Void>> deleteCategoryById(@PathVariable Long categoryId) {
+        ApiResponse<Void> response = new ApiResponse<>();
+        categoryService.deleteCategoryById(categoryId);
+        if (categoryId != null) {
+            response.setStatus(200);
+            response.setMessage("Successfully deleted a Category!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to delete a Category!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     //========================PRODUCT=========================================//
 
 
@@ -397,6 +418,24 @@ public class AdminController {
             response.setStatus(500);
             response.setMessage("Failed to Update Product");
             return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @DeleteMapping("/deleteProductById/{productId}")
+    public ResponseEntity<ApiResponse<Void>> deleteProductById(@PathVariable Long productId) {
+        ApiResponse<Void> response = new ApiResponse<>();
+        productService.deleteProductById(productId);
+        if (productId != null) {
+            response.setStatus(200);
+            response.setMessage("Successfully deleted a Product!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to delete a Product!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -644,6 +683,24 @@ public class AdminController {
     }
 
 
+    @DeleteMapping("/deleteTestimonialById/{testimonialId}")
+    public ResponseEntity<ApiResponse<Void>> deleteTestimonialById(@PathVariable Long testimonialId) {
+        ApiResponse<Void> response = new ApiResponse<>();
+        testimonialService.deleteTestimonialById(testimonialId);
+        if (testimonialId != null) {
+            response.setStatus(200);
+            response.setMessage("Successfully deleted a Testimonial!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to delete a Testimonial!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 //    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/sendWatiSMSForAllUsers/{templateName}/{role}")
     public ResponseEntity<ApiResponse> sendWatiSMSForAllUsers(@PathVariable String templateName,
@@ -749,6 +806,24 @@ public class AdminController {
     }
 
 
+    @DeleteMapping("/deleteReviewById/{reviewId}")
+    public ResponseEntity<ApiResponse<Void>> deleteReviewById(@PathVariable Long reviewId) {
+        ApiResponse<Void> response = new ApiResponse<>();
+        reviewServices.deleteReviewById(reviewId);
+        if (reviewId != null) {
+            response.setStatus(200);
+            response.setMessage("Successfully deleted a Review!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to delete a Review!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
     //========================QUESTIONS==========================//
 
     @GetMapping("/getAllQuestions")
@@ -816,6 +891,24 @@ public class AdminController {
         } catch (Exception e) {
             response.setStatus(500);
             response.setMessage("Failed to get Product question!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @DeleteMapping("/deleteQuestionById/{questionId}")
+    public ResponseEntity<ApiResponse<Void>> deleteQuestionById(@PathVariable Long questionId) {
+        ApiResponse<Void> response = new ApiResponse<>();
+        questionsServices.deleteQuestionById(questionId);
+        if (questionId != null) {
+            response.setStatus(200);
+            response.setMessage("Successfully deleted a Question!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to delete a Question!");
             response.setData(null);
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -891,6 +984,23 @@ public class AdminController {
         }
     }
 
+    @DeleteMapping("/deleteHeaderById/{headerId}")
+    public ResponseEntity<ApiResponse<Void>> deleteHeaderById(@PathVariable Long headerId) {
+        ApiResponse<Void> response = new ApiResponse<>();
+        headerServices.deleteHeaderById(headerId);
+        if (headerId != null) {
+            response.setStatus(200);
+            response.setMessage("Successfully deleted a Header!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to delete a Header!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 //==========================PROJECTS======================================//
 
 
@@ -927,21 +1037,48 @@ public class AdminController {
     }
 
     @PostMapping("/createProject")
-    public ResponseEntity<ApiResponse<ProjectsDTO>> createProject( @RequestBody ProjectsDTO projectsDTO) {
+    public ResponseEntity<ApiResponse<ProjectsDTO>> createProject(
+            @RequestPart("projectsDTO") String projectsDTO,
+            @RequestPart("projectsImageFiles") MultipartFile[] projectsImageFiles) {
 
         ApiResponse<ProjectsDTO> response = new ApiResponse<>();
-        ProjectsDTO projectsDTO1 = projectsServices.createProject(projectsDTO);
-        if (projectsDTO1 != null){
-            response.setStatus(200);
-            response.setMessage("Create Project Successfully");
-            response.setData(projectsDTO1);
-            return  new ResponseEntity<>(response, HttpStatus.OK);
-        }else {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ProjectsDTO projectsDtoObj = objectMapper.readValue(projectsDTO, ProjectsDTO.class);
+
+            List<String> imageFileNames = new ArrayList<>();
+            for (MultipartFile file : projectsImageFiles) {
+                String fileName = file.getOriginalFilename();
+                Path filePath = Paths.get(uploadProjectsDir, fileName);
+                Files.createDirectories(filePath.getParent());
+                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                imageFileNames.add(fileName);
+            }
+
+            // Assuming your DTO has setImages(List<String>) or similar
+            projectsDtoObj.setImages(imageFileNames); // 🔁 Set all image names
+
+            ProjectsDTO savedProjects = projectsServices.createProject(projectsDtoObj);
+
+            if (savedProjects != null) {
+                response.setStatus(200);
+                response.setMessage("Create Project Successfully");
+                response.setData(savedProjects);
+                return ResponseEntity.ok(response);
+            } else {
+                response.setStatus(500);
+                response.setMessage("Failed to create Project");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            }
+
+        } catch (IOException e) {
             response.setStatus(500);
-            response.setMessage("Failed to create Project");
-            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            response.setMessage("Error processing project creation: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+
 
     @PutMapping("/updateProject/{projectId}")
     public ResponseEntity<ApiResponse<ProjectsDTO>> updateProject(@RequestBody ProjectsDTO projectsDTO,
@@ -961,5 +1098,21 @@ public class AdminController {
     }
 
 
+    @DeleteMapping("/deleteProjectById/{projectId}")
+    public ResponseEntity<ApiResponse<Void>> deleteProjectById(@PathVariable Long projectId) {
+        ApiResponse<Void> response = new ApiResponse<>();
+        projectsServices.deleteProjectById(projectId);
+        if (projectId != null) {
+            response.setStatus(200);
+            response.setMessage("Successfully deleted a Project!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Failed to delete a Project!");
+            response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
 }

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -15,7 +16,7 @@ public class ProjectsDTO {
     private String projectName;
     private String customerName;
     private String description;
-    private String images;
+    private List<String> images;
     private Date startDate;
     private Date endDate;
 }
