@@ -92,10 +92,10 @@ public class UserController {
     }
 
 
-    @GetMapping("/getUserByFirstName/{firstName}")
-    public ResponseEntity<ApiResponse<ProfileDTO>> getUserByFirstName(@PathVariable String firstName){
+    @GetMapping("/getUserByFirstName/{username}")
+    public ResponseEntity<ApiResponse<ProfileDTO>> getUserByFirstName(@PathVariable String username){
         ApiResponse<ProfileDTO>  response = new ApiResponse<>();
-        ProfileDTO userDTOs = userProfileService.getUserByFirstName(firstName);
+        ProfileDTO userDTOs = userDetailsService.getProfileUsername(username);
         if (userDTOs != null){
             response.setStatus(200);
             response.setMessage("Fetch User By Id Data Successfully");
