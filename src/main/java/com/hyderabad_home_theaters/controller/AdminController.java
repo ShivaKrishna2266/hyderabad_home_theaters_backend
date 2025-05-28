@@ -459,22 +459,22 @@ public class AdminController {
         }
     }
 
-    @DeleteMapping("/deleteProduct/{productId}")
-    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long productId) {
-        ApiResponse<Void> response = new ApiResponse<>();
-        productService.deleteProductById(productId);
-        if (productId != null) {
-            response.setStatus(200);
-            response.setMessage("Successfully deleted a Product!");
-            response.setData(null);
-            return new ResponseEntity<>(response, HttpStatus.OK);
-        } else {
-            response.setStatus(500);
-            response.setMessage("Failed to delete a Product!");
-            response.setData(null);
-            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+//    @DeleteMapping("/deleteProduct/{productId}")
+//    public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long productId) {
+//        ApiResponse<Void> response = new ApiResponse<>();
+//        productService.deleteProductById(productId);
+//        if (productId != null) {
+//            response.setStatus(200);
+//            response.setMessage("Successfully deleted a Product!");
+//            response.setData(null);
+//            return new ResponseEntity<>(response, HttpStatus.OK);
+//        } else {
+//            response.setStatus(500);
+//            response.setMessage("Failed to delete a Product!");
+//            response.setData(null);
+//            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
 
 
     //==========================SUB CATEGORY======================================//

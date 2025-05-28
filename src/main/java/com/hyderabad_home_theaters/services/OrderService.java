@@ -92,6 +92,8 @@ public class OrderService {
         } else {
             userProfile = new UserProfile();
             userProfile.setUsername(username);
+            userProfile.setFirstName(orderRequest.getProfile().getFirstName());
+            userProfile.setUsername(orderRequest.getProfile().getSurname());
             userProfile.setEmail(orderRequest.getEmail());
             userProfile.setMobileNumber(orderRequest.getMobileNumber());
             userProfile.setCustomer(customer);

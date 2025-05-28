@@ -82,8 +82,8 @@ public class AuthController {
 
 //            UserDetails userDetails = customUserDetailsService.loadUserByUsername(request.getUsername());
             User user = userDetailsService.findByUsername(request.getUsername());
-//            ProfileDTO profileDTO = userDetailsService.getProfileUsername(user.getUsername());
-            ProfileDTO profileDTO = userProfileService.getUserByFirstName(user.getUsername());
+            ProfileDTO profileDTO = userDetailsService.getProfileUsername(user.getUsername());
+//            ProfileDTO profileDTO = userProfileService.getUserByFirstName(user.getUsername());
 
 
             ObjectMapper objectMapper = new ObjectMapper();

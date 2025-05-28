@@ -208,6 +208,9 @@ public class ProductServiceImpl implements ProductService {
         if (!productRepository.existsById(productId)) {
             throw new ResourceNotFoundException("Product with ID " + productId + " not found");
         }
+
+        reviewRepository.deleteByProductId(productId);
+
         productRepository.deleteById(productId);
     }
 

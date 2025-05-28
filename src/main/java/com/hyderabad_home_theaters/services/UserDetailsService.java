@@ -131,7 +131,8 @@ public class UserDetailsService {
 
         ProfileDTO profileDTO = new ProfileDTO();
         profileDTO.setUsername(userProfile.getUsername());
-        profileDTO.setFullName(userProfile.getUsername()); // Update with real logic if needed
+        profileDTO.setFirstName(userProfile.getFirstName());
+        profileDTO.setSurname(userProfile.getSurname());// Update with real logic if needed
         profileDTO.setEmail(userProfile.getEmail());
         profileDTO.setMobileNumber(userProfile.getMobileNumber());
 

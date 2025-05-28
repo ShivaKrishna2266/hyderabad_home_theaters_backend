@@ -27,6 +27,12 @@ public class UserProfile {
     @Column(name = "user_name")
     private String username;
 
+    @Column(name = "first_name")
+    private String firstName;
+
+    @Column(name = "sur_name")
+    private String surname;
+
     @Column(name = "email")
     private String email;
 
