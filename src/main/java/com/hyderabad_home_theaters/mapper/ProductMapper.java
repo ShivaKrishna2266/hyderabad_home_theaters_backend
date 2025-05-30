@@ -24,7 +24,7 @@ public class ProductMapper {
         productDTO.setProductSku(product.getProductSku());
         productDTO.setStockQuantity(product.getStockQuantity());
         productDTO.setImageName(product.getImageName());
-        productDTO.setImageURL(product.getImageURL());
+        productDTO.setImages(product.getImages());
         productDTO.setStatus(product.getStatus());
 
         productDTO.setOriginalPrice(product.getOriginalPrice());
@@ -69,7 +69,7 @@ public class ProductMapper {
         product.setProductRank(productDTO.getProductRank());
         product.setProductSku(productDTO.getProductSku());
         product.setImageName(productDTO.getImageName());
-        product.setImageURL(productDTO.getImageURL());
+        product.setImages(productDTO.getImages());
         product.setStockQuantity(productDTO.getStockQuantity());
 
         product.setOriginalPrice(productDTO.getOriginalPrice());

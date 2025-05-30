@@ -90,7 +90,7 @@ public class ProductServiceImpl implements ProductService {
 
         // Set image and status
         product.setImageName(productDTO.getImageName());
-        product.setImageURL(productDTO.getImageURL());
+        product.setImages(productDTO.getImages());
         product.setStatus(productDTO.getStatus());
 
         // Set audit info
@@ -135,7 +135,7 @@ public class ProductServiceImpl implements ProductService {
             product.setStatus(productDTO.getStatus());
             product.setStockQuantity(productDTO.getStockQuantity());
             product.setImageName(productDTO.getImageName());
-            product.setImageURL(productDTO.getImageURL());
+            product.setImages(productDTO.getImages());
 
             // Update additional fields
             product.setOriginalPrice(productDTO.getOriginalPrice());

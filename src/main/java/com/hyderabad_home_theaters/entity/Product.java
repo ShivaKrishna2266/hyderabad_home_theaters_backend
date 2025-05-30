@@ -1,7 +1,9 @@
 package com.hyderabad_home_theaters.entity;
 
+import com.hyderabad_home_theaters.util.StringListConverter;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -50,8 +52,9 @@ public class Product {
     @Column(name = "image_name")
     private String imageName;
 
-    @Column(name ="image_URL")
-    private String  imageURL;
+    @Column(name = "images", columnDefinition = "TEXT")
+    @Convert(converter = StringListConverter.class)
+    private List<String> images;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", referencedColumnName = "category_id")
