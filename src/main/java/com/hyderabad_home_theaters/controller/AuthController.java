@@ -8,6 +8,7 @@ import com.hyderabad_home_theaters.config.CustomUserDetailsService;
 import com.hyderabad_home_theaters.config.JwtUtil;
 import com.hyderabad_home_theaters.entity.User;
 import com.hyderabad_home_theaters.entity.WatiTemplatesResponse;
+import com.hyderabad_home_theaters.services.PasswordResetService;
 import com.hyderabad_home_theaters.services.UserDetailsService;
 import com.hyderabad_home_theaters.services.UserProfileService;
 import com.hyderabad_home_theaters.services.WatiService;
@@ -49,6 +50,9 @@ public class AuthController {
 
     @Autowired
     private WatiService watiService;
+
+    @Autowired
+    private  PasswordResetService passwordResetService;
 
     private Map<String, String> otpStore = new ConcurrentHashMap<>();
 
@@ -122,18 +126,6 @@ public class AuthController {
         return ResponseEntity.ok(result);
     }
 
-//    @PostMapping("/verify-otp")
-//    public ResponseEntity<String> verifyOtpAndRegister(@RequestBody UserDTO request) {
-//        try {
-//            // Verify OTP and complete registration
-//            userDetailsService.verifyOtpAndRegisterUser(request);
-//            return ResponseEntity.ok("Registration successful!");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-//        }
-//    }
-
-
     @PostMapping("/verify-otp")
     public ResponseEntity<Map<String, String>> verifyOtpAndRegister(@RequestBody UserDTO request) {
         Map<String, String> response = new HashMap<>();
@@ -146,5 +138,20 @@ public class AuthController {
             response.put("error", "OTP verification failed: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
+    }
+
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        passwordResetService.sendResetEmail(email);
+        return ResponseEntity.ok("Reset link sent to email");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestParam String token,
+                                                @RequestParam String newPassword) {
+        passwordResetService.resetPassword(token, newPassword);
+        return ResponseEntity.ok("Password reset successfully");
     }
     }

@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,7 +19,7 @@ public class ProductDTO {
     private Integer productRank;
     private String productSku;
     private String imageName;
-    private String  imageURL;
+    private List<String> images;
     private Long categoryId;
     private Long brandId;
     private Long subCategoryId;

@@ -368,7 +368,7 @@ public class AdminController {
 
     @PostMapping("/createProduct")
     public ResponseEntity<ApiResponse<ProductDTO>> createProduct( @RequestPart("productDTO") String productDTO,
-                                                                  @RequestPart("productImageFile") MultipartFile productImageFile) {
+                                                                  @RequestPart("productImageFile") MultipartFile[] productImageFiles) {
 
         ApiResponse<ProductDTO> response = new ApiResponse<>();
 
@@ -376,16 +376,17 @@ public class AdminController {
             ObjectMapper objectMapper = new ObjectMapper();
             ProductDTO productImageDtoObj = objectMapper.readValue(productDTO, ProductDTO.class);
 
-            // Extract filename
-            String fileName = productImageFile.getOriginalFilename();
-            Path filePath = Paths.get(uploadProductDir, fileName);
+            List<String> imageFileNames = new ArrayList<>();
+            for (MultipartFile file : productImageFiles) {
+                String fileName = file.getOriginalFilename();
+                Path filePath = Paths.get(uploadProductDir, fileName);
+                Files.createDirectories(filePath.getParent());
+                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                imageFileNames.add(fileName);
+            }
 
-            // Ensure directory exists
-            Files.createDirectories(filePath.getParent());
 
-            // Save the file
-            Files.copy(productImageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-            productImageDtoObj.setImageURL(fileName);
+            productImageDtoObj.setImages(imageFileNames);
         ProductDTO productDTO1 = productService.createProduct(productImageDtoObj);
         if (productDTO1 != null){
             response.setStatus(200);

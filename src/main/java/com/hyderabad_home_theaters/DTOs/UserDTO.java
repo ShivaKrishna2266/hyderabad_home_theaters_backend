@@ -22,4 +22,7 @@ public class UserDTO {
     private Timestamp createDate;
     private String updatedBy;
     private Timestamp updatedDate;
+
+    private String resetToken;
+    private Timestamp tokenExpiry;
 }
