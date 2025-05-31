@@ -60,11 +60,16 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserDTO request) {
         Map<String, String> response = new HashMap<>();
         try {
-            userDetailsService.registerUser(request);
-            response.put("message", "OTP sent. Please verify your OTP to complete registration.");
-            return ResponseEntity.ok(response);
+            if ("ROLE_ADMIN".equals(request.getRole())) {
+                userDetailsService.registerAdminDirectly(request);
+                response.put("message", "Admin registered successfully.");
+                return ResponseEntity.ok(response);
+            } else {
+                userDetailsService.registerUser(request);
+                response.put("message", "OTP sent. Please verify your OTP to complete registration.");
+                return ResponseEntity.ok(response);
+            }
         } catch (RuntimeException e) {
-            // This handles errors like "Username already exists" sent as RuntimeException
             response.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         } catch (Exception e) {
