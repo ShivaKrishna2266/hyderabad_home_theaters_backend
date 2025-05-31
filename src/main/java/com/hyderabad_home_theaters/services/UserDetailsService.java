@@ -118,6 +118,45 @@ public class UserDetailsService {
         return request;
     }
 
+
+    public UserDTO registerAdminDirectly(UserDTO request) {
+        // Check if username & mobile already exists
+        if (userRepository.existsByUsernameAndPhoneNumber(request.getUsername(), request.getPhoneNumber())) {
+            throw new RuntimeException("Username and phoneNumber already registered");
+        }
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setEnabled(true);
+
+        Role role = roleService.findByRoleName(request.getRole());
+        if (role == null) {
+            throw new RuntimeException("Role not found: " + request.getRole());
+        }
+
+        Set<Role> roles = new HashSet<>();
+        roles.add(role);
+        user.setRoles(roles);
+        userRepository.save(user);
+
+        UserProfile userProfile = new UserProfile();
+        userProfile.setUsername(request.getUsername());
+        userProfile.setEmail(request.getEmail());
+        userProfile.setMobileNumber(request.getPhoneNumber());
+        userProfile.setPassword(request.getPassword());
+        userProfile.setCreatedBy("System");
+        userProfile.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
+        userProfile.setUpdatedBy("System");
+        userProfile.setUpdatedDate(Timestamp.valueOf(LocalDateTime.now()));
+        userProfileRepository.save(userProfile);
+
+        return request;
+    }
+
+
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User Not Found: " + username));

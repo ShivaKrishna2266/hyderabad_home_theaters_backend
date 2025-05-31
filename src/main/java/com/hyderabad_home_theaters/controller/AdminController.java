@@ -3,6 +3,7 @@ package com.hyderabad_home_theaters.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hyderabad_home_theaters.DTOs.BrandDTO;
 import com.hyderabad_home_theaters.DTOs.CategoryDTO;
+import com.hyderabad_home_theaters.DTOs.CustomerDTO;
 import com.hyderabad_home_theaters.DTOs.HeaderDTO;
 import com.hyderabad_home_theaters.DTOs.ProductDTO;
 import com.hyderabad_home_theaters.DTOs.ProjectsDTO;
@@ -15,6 +16,7 @@ import com.hyderabad_home_theaters.entity.MessageTemplate;
 import com.hyderabad_home_theaters.exception.ResourceNotFoundException;
 import com.hyderabad_home_theaters.services.BrandService;
 import com.hyderabad_home_theaters.services.CategoryService;
+import com.hyderabad_home_theaters.services.CustomerServices;
 import com.hyderabad_home_theaters.services.HeaderServices;
 import com.hyderabad_home_theaters.services.ProductService;
 import com.hyderabad_home_theaters.services.ProjectsServices;
@@ -83,6 +85,9 @@ public class AdminController {
 
     @Autowired
     private ProjectsServices projectsServices;
+
+    @Autowired
+    private CustomerServices customerServices;
 
 
     @Value("${file.upload.brand.dir}")
@@ -1112,6 +1117,25 @@ public class AdminController {
             response.setStatus(500);
             response.setMessage("Failed to delete a Project!");
             response.setData(null);
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+//    ======================CUSTOMER=============================================
+
+
+    @GetMapping("/getAllCustomers")
+    private ResponseEntity<ApiResponse<List<CustomerDTO>>> getAllCustomers() {
+        ApiResponse<List<CustomerDTO>> response = new ApiResponse<>();
+        List<CustomerDTO> customerDTOS = customerServices.getAllCustomers();
+        if (customerDTOS != null) {
+            response.setStatus(200);
+            response.setMessage("Fetch All Customers successfully");
+            response.setData(customerDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("failed to Fetch Brands");
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
