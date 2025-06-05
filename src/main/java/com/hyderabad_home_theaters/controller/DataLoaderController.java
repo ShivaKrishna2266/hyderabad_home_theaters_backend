@@ -1,6 +1,7 @@
 package com.hyderabad_home_theaters.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hyderabad_home_theaters.DTOs.BannerDTO;
 import com.hyderabad_home_theaters.DTOs.BrandDTO;
 import com.hyderabad_home_theaters.DTOs.CategoryDTO;
 import com.hyderabad_home_theaters.DTOs.ContactUsDTO;
@@ -17,6 +18,7 @@ import com.hyderabad_home_theaters.DTOs.SubCategoryDTO;
 import com.hyderabad_home_theaters.DTOs.TestimonialDTO;
 import com.hyderabad_home_theaters.entity.ApiResponse;
 import com.hyderabad_home_theaters.exception.ResourceNotFoundException;
+import com.hyderabad_home_theaters.services.BannerServices;
 import com.hyderabad_home_theaters.services.BrandService;
 import com.hyderabad_home_theaters.services.CategoryService;
 import com.hyderabad_home_theaters.services.ContactUsService;
@@ -53,7 +55,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
 
@@ -102,6 +103,9 @@ public class DataLoaderController {
 
    @Autowired
    private ProjectsServices projectsServices;
+
+   @Autowired
+   private BannerServices bannerServices;
 
 
     @Value("${file.upload.review.dir}")
@@ -896,5 +900,61 @@ public class DataLoaderController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    //    =============================*BANNER*==============================================
+
+
+    @GetMapping("/getAllBanners")
+    public ResponseEntity<ApiResponse<List<BannerDTO>>> getAllBanners() {
+        ApiResponse<List<BannerDTO>> response = new ApiResponse<>();
+        List<BannerDTO> banners = bannerServices.getAllBanner();
+        if (banners != null) {
+            response.setStatus(200);
+            response.setMessage("Banners retrieved successfully");
+            response.setData(banners);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Error retrieving banners");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/getBannerById/{bannerId}")
+    public ResponseEntity<ApiResponse<BannerDTO>> getBannerById(@PathVariable Long bannerId){
+        ApiResponse<BannerDTO> response = new ApiResponse<>();
+        BannerDTO bannerDTOS = bannerServices.getBannerById(bannerId);
+
+        if (bannerDTOS != null){
+            response.setStatus(200);
+            response.setMessage(" BannerId By Banner successfully");
+            response.setData(bannerDTOS);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            response.setStatus(500);
+            response.setMessage("Error BannerId By Banner");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @GetMapping("/getBannersByTitle")
+    public ResponseEntity<ApiResponse<BannerDTO>> getBannersByTitle(@RequestParam String title) {
+        ApiResponse<BannerDTO> response = new ApiResponse<>();
+        Optional<BannerDTO> bannerOpt = bannerServices.getBannerByTitle(title);
+
+        if (bannerOpt.isPresent()) {
+            response.setStatus(200);
+            response.setMessage("Banner fetched successfully");
+            response.setData(bannerOpt.get());
+            return ResponseEntity.ok(response);
+        } else {
+            response.setStatus(404);
+            response.setMessage("No banner found with title: " + title);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
 
 }

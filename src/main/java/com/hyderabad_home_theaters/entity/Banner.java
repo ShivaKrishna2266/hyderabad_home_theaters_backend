@@ -1,6 +1,8 @@
 package com.hyderabad_home_theaters.entity;
 
+import com.hyderabad_home_theaters.util.StringListConverter;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -30,8 +33,13 @@ public class Banner {
     @Column(name = "sub_title")
     private String subTitle;
 
-    @Column(name = "cover_image")
-    private String coverImage;
+    @Column(name = "cover_image", columnDefinition = "TEXT")
+    @Convert(converter = StringListConverter.class)
+    private List<String> coverImage;
+
+    @Column(name = "video_file_name", columnDefinition = "TEXT")
+    @Convert(converter = StringListConverter.class)
+    private List<String> videoFileName;
 
     @Column(name = "url")
     private String url;

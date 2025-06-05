@@ -31,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -112,6 +111,9 @@ public class AdminController {
     @Value("${file.upload.projects.dir}")
     private String uploadProjectsDir;
 
+
+    @Value("${file.upload.banners.dir}")
+    private String uploadBannersDir;
 
 
     @GetMapping("/getAllBrands")
@@ -1169,21 +1171,61 @@ public class AdminController {
 
 
     @PostMapping("/addBanner")
-    public ResponseEntity<ApiResponse<BannerDTO>> addBanner( @RequestBody BannerDTO bannerDTO) {
+    public ResponseEntity<ApiResponse<BannerDTO>> addBanner(
+            @RequestPart("bannerDTO") String bannerDTO,
+            @RequestPart(value = "bannerImageFiles", required = false) MultipartFile[] bannerImageFiles,
+            @RequestPart(value = "bannerVideoFiles", required = false) MultipartFile[] bannerVideoFiles) {
 
         ApiResponse<BannerDTO> response = new ApiResponse<>();
-        BannerDTO bannerDTO1 = bannerServices.addBanner(bannerDTO);
-        if (bannerDTO1 != null){
-            response.setStatus(200);
-            response.setMessage("Create Banner Successfully");
-            response.setData(bannerDTO1);
-            return  new ResponseEntity<>(response, HttpStatus.OK);
-        }else {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            BannerDTO bannerDtoObj = objectMapper.readValue(bannerDTO, BannerDTO.class);
+
+            List<String> imageFileNames = new ArrayList<>();
+            if (bannerImageFiles != null) {
+                for (MultipartFile file : bannerImageFiles) {
+                    String fileName = file.getOriginalFilename();
+                    Path filePath = Paths.get(uploadBannersDir, fileName);
+                    Files.createDirectories(filePath.getParent());
+                    Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                    imageFileNames.add(fileName);
+                }
+            }
+
+            List<String> videoFileNames = new ArrayList<>();
+            if (bannerVideoFiles != null) {
+                for (MultipartFile file : bannerVideoFiles) {
+                    String fileName = file.getOriginalFilename();
+                    Path filePath = Paths.get(uploadBannersDir, fileName);
+                    Files.createDirectories(filePath.getParent());
+                    Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                    videoFileNames.add(fileName);
+                }
+            }
+
+            bannerDtoObj.setCoverImage(imageFileNames); // Image filenames
+            bannerDtoObj.setVideoFileName(videoFileNames); // Video filenames
+
+            BannerDTO savedBanners = bannerServices.addBanner(bannerDtoObj);
+
+            if (savedBanners != null) {
+                response.setStatus(200);
+                response.setMessage("Create Banner Successfully");
+                response.setData(savedBanners);
+                return new ResponseEntity<>(response, HttpStatus.OK);
+            } else {
+                response.setStatus(500);
+                response.setMessage("Failed to create Banner");
+                return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (IOException e) {
             response.setStatus(500);
-            response.setMessage("Failed to create Banner");
-            return  new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            response.setMessage("Error processing banner creation: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+
 
     @PutMapping("/updateBanner/{bannerId}")
     public ResponseEntity<ApiResponse<BannerDTO>> updateBanner(@PathVariable Long bannerId,
