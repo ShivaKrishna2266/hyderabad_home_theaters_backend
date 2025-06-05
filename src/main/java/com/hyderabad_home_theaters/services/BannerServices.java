@@ -4,6 +4,7 @@ import com.hyderabad_home_theaters.DTOs.BannerDTO;
 import com.hyderabad_home_theaters.exception.ApplicationBusinessException;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface BannerServices {
 
@@ -19,4 +20,7 @@ public interface BannerServices {
     BannerDTO deleteBannerById(Long bannerId);
 
     BannerDTO updateBannerStatus(Long bannerId, String status);
+
+    Optional<BannerDTO> getBannerByTitle(String title);
+
 }

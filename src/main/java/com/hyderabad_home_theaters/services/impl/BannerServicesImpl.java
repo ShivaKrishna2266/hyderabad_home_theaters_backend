@@ -1,12 +1,9 @@
 package com.hyderabad_home_theaters.services.impl;
 
 import com.hyderabad_home_theaters.DTOs.BannerDTO;
-import com.hyderabad_home_theaters.DTOs.BrandDTO;
 import com.hyderabad_home_theaters.entity.Banner;
-import com.hyderabad_home_theaters.entity.Brand;
 import com.hyderabad_home_theaters.exception.ApplicationBusinessException;
 import com.hyderabad_home_theaters.mapper.BannerMapper;
-import com.hyderabad_home_theaters.mapper.BrandMapper;
 import com.hyderabad_home_theaters.repository.BannerRepository;
 import com.hyderabad_home_theaters.services.BannerServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +46,7 @@ public class BannerServicesImpl implements BannerServices {
 
             banner.setTitle(banner.getTitle());
             banner.setCoverImage(banner.getCoverImage());
+            banner.setVideoFileName(banner.getVideoFileName());
             banner.setSubTitle(banner.getSubTitle());
             banner.setStatus(banner.getStatus());
             banner.setProStatus(banner.getProStatus());
@@ -78,6 +76,7 @@ public class BannerServicesImpl implements BannerServices {
             banner.setTitle(banner.getTitle());
             banner.setSubTitle(banner.getSubTitle());
             banner.setCoverImage(banner.getCoverImage());
+            banner.setVideoFileName(banner.getVideoFileName());
             banner.setStatus(banner.getStatus());
             banner.setProStatus(banner.getProStatus());
 
@@ -119,4 +118,12 @@ public class BannerServicesImpl implements BannerServices {
             throw  new ApplicationBusinessException("Error while update banner status");
         }
     }
+
+    @Override
+    public Optional<BannerDTO> getBannerByTitle(String title) {
+        return bannerRepository.findByTitle(title)
+                .map(BannerMapper::convertToDTO);
+    }
+
+
 }
